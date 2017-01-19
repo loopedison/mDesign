@@ -143,14 +143,7 @@ uint8_t *MEM_If_Read_FS (uint8_t *src, uint8_t *dest, uint32_t Len)
 {
   for(uint32_t i=0; i<Len; i++)
   {
-    if((uint32_t)(src+i) < USBD_DFU_APP_DEFAULT_ADD)
-    {
-      dest[i] = 0XFF;
-    }
-    else
-    {
-      dest[i] = *(src+i);
-    }
+    dest[i] = 0XFF;
   }
   return (uint8_t*)(dest);
 }
