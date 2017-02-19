@@ -1,54 +1,37 @@
 /**
   ******************************************************************************
-  * @file    bsp_conf.h
+  * @file    bsp_usben.h
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
-  * @brief   Config for BSP
+  * @brief   Function for USB ENABLE
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __BSP_CONF_H__
-#define __BSP_CONF_H__
+#ifndef __BSP_USBEN_H__
+#define __BSP_USBEN_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "bsp_def.h"
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
-#define USE_BSP_ASSERT    (1)
-  
 /* Exported functions ------------------------------------------------------- */
-
-#define BSP_SYSLED_MODULE_ENABLED
-#define BSP_USBEN_MODULE_ENABLED
-
-#ifdef BSP_SYSLED_MODULE_ENABLED
-  #include "bsp_sysLed.h"
-//  #define BSP_SYSLED_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
-//  #define BSP_SYSLED_GPIO_PORT          (GPIOB)
-//  #define BSP_SYSLED_GPIO_PIN           (GPIO_PIN_12)
-//  #define BSP_SYSLED_LEVEL_TOGGLE       (0)
-#endif /* BSP_SYSLED_MODULE_ENABLED */
-
-#ifdef BSP_USBEN_MODULE_ENABLED
-  #include "bsp_usben.h"
-//  #define BSP_USBEN_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
-//  #define BSP_USBEN_GPIO_PORT          (GPIOB)
-//  #define BSP_USBEN_GPIO_PIN           (GPIO_PIN_12)
-//  #define BSP_USBEN_LEVEL_TOGGLE       (0)
-#endif /* BSP_USBEN_MODULE_ENABLED */
-
+BSP_StatusTypeDef BSP_USBEN_Init(void);
+BSP_StatusTypeDef BSP_USBEN_Off(void);
+BSP_StatusTypeDef BSP_USBEN_On(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __BSP_CONF_H__ */
+#endif /* __BSP_USBEN_H__ */
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

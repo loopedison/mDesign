@@ -84,6 +84,7 @@ BootLoader_StatusTypeDef BootLoader_Main(void)
   /* Init BSP SYSLED */
   BSP_Init();
   BSP_SYSLED_Init();
+  BSP_USBEN_Init();
   
   /* Flash SYSLED Start */
   BSP_SYSLED_On();
@@ -220,6 +221,8 @@ BootLoader_StatusTypeDef BootLoader_Main(void)
       USBD_DFU_RegisterMedia(&hUsbDeviceFS, &USBD_DFU_fops_FS);
       /* Start Device Process */
       USBD_Start(&hUsbDeviceFS);
+      /* Enable USB Connect */
+      BSP_USBEN_On();
       
       while(1)
       {

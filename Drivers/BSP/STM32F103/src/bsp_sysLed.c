@@ -16,15 +16,15 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #ifndef BSP_SYSLED_GPIO_CLK_ENABLE
-  #define BSP_SYSLED_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
+  #define BSP_SYSLED_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOC_CLK_ENABLE()
 #endif /* BSP_SYSLED_GPIO_CLK_ENABLE */
 
 #ifndef BSP_SYSLED_GPIO_PORT
-  #define BSP_SYSLED_GPIO_PORT          (GPIOB)
+  #define BSP_SYSLED_GPIO_PORT          (GPIOC)
 #endif /* BSP_SYSLED_GPIO_PORT */
 
 #ifndef BSP_SYSLED_GPIO_PIN
-  #define BSP_SYSLED_GPIO_PIN           (GPIO_PIN_12)
+  #define BSP_SYSLED_GPIO_PIN           (GPIO_PIN_13)
 #endif /* BSP_SYSLED_GPIO_PIN */
 
 #ifndef BSP_SYSLED_LEVEL_TOGGLE
@@ -50,7 +50,7 @@ BSP_StatusTypeDef BSP_SYSLED_Init(void)
   
   /* GPIO Ports Clock Enable */
   BSP_SYSLED_GPIO_CLK_ENABLE();
-  /*Configure GPIO pins : PB2 */
+  /*Configure GPIO pins */
   GPIO_InitStruct.Pin = BSP_SYSLED_GPIO_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
