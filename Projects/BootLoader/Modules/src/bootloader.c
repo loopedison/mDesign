@@ -148,6 +148,9 @@ BootLoader_StatusTypeDef BootLoader_Main(void)
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    
+    /* Read Button */
+    HAL_Delay(2);
     if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET)
     {
       bootFlag = SYS_BOOT_FLAG_KEYWORD;
