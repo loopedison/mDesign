@@ -26,9 +26,12 @@ extern "C" {
 /* Exported functions ------------------------------------------------------- */
 
 #define BSP_SYSLED_MODULE_ENABLED
+#define BSP_UART1_MODULE_ENABLED
 #define BSP_USBEN_MODULE_ENABLED
 #define BSP_EXTI0_MODULE_ENABLED
 #define BSP_EXTI1_MODULE_ENABLED
+#define BSP_BLUEPOWER_MODULE_ENABLED
+#define BSP_BLUESET_MODULE_ENABLED
 
 #ifdef BSP_SYSLED_MODULE_ENABLED
   #include "bsp_sysLed.h"
@@ -37,6 +40,12 @@ extern "C" {
 //  #define BSP_SYSLED_GPIO_PIN           (GPIO_PIN_12)
 //  #define BSP_SYSLED_LEVEL_TOGGLE       (0)
 #endif /* BSP_SYSLED_MODULE_ENABLED */
+
+#ifdef BSP_UART1_MODULE_ENABLED
+  #include "bsp_uart1.h"
+  #define BSP_UART1_USING_INT
+  #define BSP_UART1_USING_DMA
+#endif /* BSP_UART1_MODULE_ENABLED */
 
 #ifdef BSP_USBEN_MODULE_ENABLED
   #include "bsp_usben.h"
@@ -56,6 +65,21 @@ extern "C" {
 //  #define BSP_EXTI1_PRIO              (5)
 #endif /* BSP_EXTI1_MODULE_ENABLED */
 
+#ifdef BSP_BLUEPOWER_MODULE_ENABLED
+  #include "bsp_bluepower.h"
+//  #define BSP_BLUEPOWER_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
+//  #define BSP_BLUEPOWER_GPIO_PORT          (GPIOB)
+//  #define BSP_BLUEPOWER_GPIO_PIN           (GPIO_PIN_15)
+//  #define BSP_BLUEPOWER_LEVEL_TOGGLE       (0)
+#endif /* BSP_BLUEPOWER_MODULE_ENABLED */
+
+#ifdef BSP_BLUESET_MODULE_ENABLED
+  #include "bsp_blueset.h"
+//  #define BSP_BLUESET_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOA_CLK_ENABLE()
+//  #define BSP_BLUESET_GPIO_PORT          (GPIOA)
+//  #define BSP_BLUESET_GPIO_PIN           (GPIO_PIN_8)
+//  #define BSP_BLUESET_LEVEL_TOGGLE       (0)
+#endif /* BSP_BLUESET_MODULE_ENABLED */
 
 #ifdef __cplusplus
 }

@@ -697,6 +697,11 @@
               <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_sysLed.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_uart1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_uart1.c</FilePath>
+            </File>
+            <File>
               <FileName>bsp_usben.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_usben.c</FilePath>
@@ -710,6 +715,16 @@
               <FileName>bsp_exti1.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_exti1.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_bluepower.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_bluepower.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_blueset.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_blueset.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -771,6 +786,11 @@
               <FileType>1</FileType>
               <FilePath>..\Modules\src\usbd_desc.c</FilePath>
             </File>
+            <File>
+              <FileName>storage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\storage.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -780,6 +800,16 @@
               <FileName>cpu_id.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\Utilities\CPU_ID\cpu_id.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Utilities/CRC16</GroupName>
+          <Files>
+            <File>
+              <FileName>crc16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Utilities\CRC16\crc16.c</FilePath>
             </File>
           </Files>
         </Group>

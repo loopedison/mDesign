@@ -11,7 +11,7 @@
 /*
 ********************************************************************************
   *1, Application Walker Speed
-  *2, USB For Communication, ( maybe bluetooth if need)
+  *2, USB For Communication, and bluetooth (if need) auto config
   *3, 
   ******************************************************************************
   */
