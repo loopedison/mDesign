@@ -105,6 +105,7 @@ Application_StatusTypeDef Application_Main(void)
   BSP_EXTI1_Init();
   BSP_BLUEPOWER_Init();
   BSP_BLUESET_Init();
+  BSP_BLUESTATE_Init();
   
   
   /* Flash SYSLED Start */
@@ -208,6 +209,7 @@ Application_StatusTypeDef Application_Main(void)
     uint32_t tickLed = 0;
     uint32_t tickRate = 0;
     uint32_t tickTx = 0;
+    uint32_t tickSleep = 0;
     
     
     /* Disable USB Connection */
@@ -233,6 +235,7 @@ Application_StatusTypeDef Application_Main(void)
         tickLed++;
         tickRate++;
         tickTx++;
+        tickSleep++;
       }
       
       
@@ -292,6 +295,24 @@ Application_StatusTypeDef Application_Main(void)
         NVIC_SystemReset();
         while(1);
       }
+      
+      
+      /* low power control */
+      if(tsensorRate.xValue != 0)
+      {
+        tickSleep = 0;
+      }
+      
+      if(tickSleep == 0)
+      {
+        BSP_BLUEPOWER_On();
+      }
+      else if(tickSleep == 300000)
+      {
+        BSP_BLUEPOWER_Off();
+      }
+      
+      HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
     }
   }
   else

@@ -12,6 +12,6 @@
 ********************************************************************************
   *1, Application Walker Speed
   *2, USB For Communication, and bluetooth (if need) auto config
-  *3, 
+  *3, Support low power mode, turn off Bluetooth after 5min idle
   ******************************************************************************
   */

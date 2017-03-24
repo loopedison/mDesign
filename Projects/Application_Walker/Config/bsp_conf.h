@@ -32,6 +32,7 @@ extern "C" {
 #define BSP_EXTI1_MODULE_ENABLED
 #define BSP_BLUEPOWER_MODULE_ENABLED
 #define BSP_BLUESET_MODULE_ENABLED
+#define BSP_BLUESTATE_MODULE_ENABLED
 
 #ifdef BSP_SYSLED_MODULE_ENABLED
   #include "bsp_sysLed.h"
@@ -80,6 +81,14 @@ extern "C" {
 //  #define BSP_BLUESET_GPIO_PIN           (GPIO_PIN_8)
 //  #define BSP_BLUESET_LEVEL_TOGGLE       (0)
 #endif /* BSP_BLUESET_MODULE_ENABLED */
+
+#ifdef BSP_BLUESTATE_MODULE_ENABLED
+  #include "bsp_bluestate.h"
+//  #define BSP_BLUESTATE_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOB_CLK_ENABLE()
+//  #define BSP_BLUESTATE_GPIO_PORT          (GPIOB)
+//  #define BSP_BLUESTATE_GPIO_PIN           (GPIO_PIN_14)
+  #define BSP_BLUESTATE_LEVEL_TOGGLE       (1)
+#endif /* BSP_BLUESTATE_MODULE_ENABLED */
 
 #ifdef __cplusplus
 }

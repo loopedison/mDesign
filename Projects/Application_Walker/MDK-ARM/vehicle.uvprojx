@@ -726,6 +726,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_blueset.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_bluestate.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_bluestate.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
