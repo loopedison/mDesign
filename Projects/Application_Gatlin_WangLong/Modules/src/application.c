@@ -91,6 +91,7 @@ static Cmd_MsgBufDef cmds;
 
 /* Private function prototypes -----------------------------------------------*/
 int32_t AppCmd_Task(void const * argument);
+int32_t AppCmd_AutoUpload(void const * argument);
 /* Private functions ---------------------------------------------------------*/
 
 //==============================================================================
@@ -218,8 +219,6 @@ Application_StatusTypeDef Application_Main(void)
     SuperLed_Display(&sled);
     
     /* Initialize For Counter */
-    uint32_t tickNew = 0;
-    uint32_t tickLst = 0;
     cmds.mBuffRptr = 0;
     cmds.mBuffWptr = 0;
     uint32_t usbConnected = 0;
@@ -236,13 +235,6 @@ Application_StatusTypeDef Application_Main(void)
     
     while(1)
     {
-      tickNew = HAL_GetTick();
-      if(tickNew - tickLst >= 1)
-      {
-        /* Update tick */
-        tickLst = tickNew;
-      }
-      
       //=======================================
       /**
         * @brief  Led flash Task
@@ -283,9 +275,16 @@ Application_StatusTypeDef Application_Main(void)
       
       //=======================================
       /**
-        * @brief  
+        * @brief  Cmd Handle
         */
       AppCmd_Task(NULL);
+      
+      
+      //=======================================
+      /**
+        * @brief  Auto Upload key state
+        */
+      AppCmd_AutoUpload(NULL);
       
       
       //=======================================
@@ -457,7 +456,7 @@ int32_t AppCmd_Task(void const * argument)
               msg[2] = 0x08;
               msg[3] = 0X80|cur.xM[3];
               msg[4] = errCode;
-              memcpy(&msg[5], "V2.1.3", 6);
+              memcpy(&msg[5], "V2.1.4", 6);
               msg[11] = 0;
               for(uint32_t i=0; i<11; i++)
               {
@@ -473,7 +472,7 @@ int32_t AppCmd_Task(void const * argument)
               uint8_t msg[32];
               msg[0] = 0XAA;
               msg[1] = 0X55;
-              msg[2] = 0x11;
+              msg[2] = 0x12;
               msg[3] = 0X80|cur.xM[3];
               msg[4] = errCode;
               memcpy(&msg[5], hStorageMsgData.sID, 16);
@@ -672,10 +671,41 @@ int32_t AppCmd_Task(void const * argument)
 
 //==============================================================================
 /**
-  * @brief  
-  * @param  none
+  * @brief  AppCmd_AutoUpload
+  * @param  argument
   * @retval none
+  * @note   auto upload
   */
+int32_t AppCmd_AutoUpload(void const * argument)
+{
+  static uint32_t tickNew = 0;
+  static uint32_t tickLst = 0;
+  
+  tickNew = HAL_GetTick();
+  if(tickNew - tickLst >= 20)
+  {
+    /* Update tick */
+    tickLst = tickNew;
+    
+    //read keys
+    //send message
+    uint8_t msg[8];
+    msg[0] = 0XAA;
+    msg[1] = 0X55;
+    msg[2] = 0x03;
+    msg[3] = 0Xa2;
+    msg[4] = 0x00;
+    msg[5] = keyStatus;
+    msg[6] = 0;
+    for(uint32_t i=0; i<6; i++)
+    {
+      msg[6] ^= msg[i];
+    }
+    CMD_send(msg,7);
+  }
+  
+  return (0);
+}
 
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/
