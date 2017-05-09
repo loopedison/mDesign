@@ -80,6 +80,28 @@ BSP_StatusTypeDef BSP_EXTI6_Init(void)
 
 //==============================================================================
 /**
+  * @brief  read exti5 state
+  * @param  none
+  * @retval GPIO PinState
+  */
+GPIO_PinState BSP_EXTI5_ReadState(void)
+{
+  return (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5));
+}
+
+//==============================================================================
+/**
+  * @brief  read exti6 state
+  * @param  none
+  * @retval GPIO PinState
+  */
+GPIO_PinState BSP_EXTI6_ReadState(void)
+{
+  return (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6));
+}
+
+//==============================================================================
+/**
   * @brief  This function handles EXTI line95 global interrupt.
   * @param  none 
   * @retval none

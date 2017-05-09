@@ -26,6 +26,8 @@ extern "C" {
 /* Exported functions ------------------------------------------------------- */
 BSP_StatusTypeDef   BSP_EXTI5_Init(void);
 BSP_StatusTypeDef   BSP_EXTI6_Init(void);
+GPIO_PinState       BSP_EXTI5_ReadState(void);
+GPIO_PinState       BSP_EXTI6_ReadState(void);
 
 #ifdef __cplusplus
 }
