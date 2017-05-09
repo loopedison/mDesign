@@ -20,12 +20,16 @@
 #endif /* BSP_ADC1_USING_DMA */
 
 #ifndef BSP_ADC1_DMA_PRIO
-  #define BSP_ADC1_DMA_PRIO         (5) 
+  #define BSP_ADC1_DMA_PRIO         (5)
 #endif /* BSP_ADC1_DMA_PRIO */
 
 #ifndef BSP_ADC1_CHANNEL_NUM
-  #define BSP_ADC1_CHANNEL_NUM      (6) 
+  #define BSP_ADC1_CHANNEL_NUM      (4)
 #endif /* BSP_ADC1_CHANNEL_NUM */
+
+#ifndef BSP_ADC1_SAMPLETIME
+  #define BSP_ADC1_SAMPLETIME       ADC_SAMPLETIME_7CYCLES_5
+#endif /* BSP_ADC1_SAMPLETIME */
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -105,42 +109,28 @@ BSP_StatusTypeDef BSP_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
+  sConfig.SamplingTime = BSP_ADC1_SAMPLETIME;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
   
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
   sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = 2;
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
+  sConfig.SamplingTime = BSP_ADC1_SAMPLETIME;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
   
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
   sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = 3;
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
+  sConfig.SamplingTime = BSP_ADC1_SAMPLETIME;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
   
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
   sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = 4;
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
-  
-  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
-  */
-  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
-  sConfig.Rank = 5;
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
-  
-  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
-  */
-  sConfig.Channel = ADC_CHANNEL_VREFINT;
-  sConfig.Rank = 6;
-  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
+  sConfig.SamplingTime = BSP_ADC1_SAMPLETIME;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
   
   return (BSP_OK);
