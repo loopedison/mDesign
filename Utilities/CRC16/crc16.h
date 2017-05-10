@@ -23,8 +23,14 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
+/* Default */
+#define CRC16(pData, iLenIn)   CRC16_IBM(pData, iLenIn)
+
 /* Exported functions ------------------------------------------------------- */
-uint16_t CRC16(uint8_t * pData, uint32_t iLenIn);
+uint16_t CRC16_IBM(uint8_t * pData, uint32_t iLenIn);
+uint16_t CRC16_MAXIM(uint8_t * pData, uint32_t iLenIn);
+uint16_t CRC16_USB(uint8_t * pData, uint32_t iLenIn);
+uint16_t CRC16_MODEBUS(uint8_t * pData, uint32_t iLenIn);
 
 #ifdef __cplusplus
 }

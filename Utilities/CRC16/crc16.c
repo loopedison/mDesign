@@ -16,7 +16,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static const uint16_t wCRC16Table[256] = 
+static const uint16_t wCRC16Table_8005[256] = 
 {
   0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
   0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
@@ -56,19 +56,76 @@ static const uint16_t wCRC16Table[256] =
 
 //==============================================================================
 /**
-  * @brief  CRC16 Calc
+  * @brief  CRC16 IBM Calc
   * @param  * pData     :data
   * @param  * iLenIn    :len
   * @retval crc result
   */
-uint16_t CRC16(uint8_t * pData, uint32_t iLenIn)
+uint16_t CRC16_IBM(uint8_t * pData, uint32_t iLenIn)
 {
   uint16_t wResult = 0;
   uint16_t wTableNo = 0;
   for(uint32_t i=0; i<iLenIn; i++)
   {
     wTableNo = ((wResult & 0xff) ^ (pData[i] & 0xff));
-    wResult = ((wResult >> 8) & 0xff) ^ wCRC16Table[wTableNo];
+    wResult = ((wResult >> 8) & 0xff) ^ wCRC16Table_8005[wTableNo];
+  }
+  return (wResult);
+}
+
+//==============================================================================
+/**
+  * @brief  CRC16 MAXIM Calc
+  * @param  * pData     :data
+  * @param  * iLenIn    :len
+  * @retval crc result
+  */
+uint16_t CRC16_MAXIM(uint8_t * pData, uint32_t iLenIn)
+{
+  uint16_t wResult = 0;
+  uint16_t wTableNo = 0XFFFF;
+  for(uint32_t i=0; i<iLenIn; i++)
+  {
+    wTableNo = ((wResult & 0xff) ^ (pData[i] & 0xff));
+    wResult = ((wResult >> 8) & 0xff) ^ wCRC16Table_8005[wTableNo];
+  }
+  return (wResult);
+}
+
+//==============================================================================
+/**
+  * @brief  CRC16 USB Calc
+  * @param  * pData     :data
+  * @param  * iLenIn    :len
+  * @retval crc result
+  */
+uint16_t CRC16_USB(uint8_t * pData, uint32_t iLenIn)
+{
+  uint16_t wResult = 0XFFFF;
+  uint16_t wTableNo = 0XFFFF;
+  for(uint32_t i=0; i<iLenIn; i++)
+  {
+    wTableNo = ((wResult & 0xff) ^ (pData[i] & 0xff));
+    wResult = ((wResult >> 8) & 0xff) ^ wCRC16Table_8005[wTableNo];
+  }
+  return (wResult);
+}
+
+//==============================================================================
+/**
+  * @brief  CRC16 MODBUS Calc
+  * @param  * pData     :data
+  * @param  * iLenIn    :len
+  * @retval crc result
+  */
+uint16_t CRC16_MODEBUS(uint8_t * pData, uint32_t iLenIn)
+{
+  uint16_t wResult = 0XFFFF;
+  uint16_t wTableNo = 0;
+  for(uint32_t i=0; i<iLenIn; i++)
+  {
+    wTableNo = ((wResult & 0xff) ^ (pData[i] & 0xff));
+    wResult = ((wResult >> 8) & 0xff) ^ wCRC16Table_8005[wTableNo];
   }
   return (wResult);
 }
