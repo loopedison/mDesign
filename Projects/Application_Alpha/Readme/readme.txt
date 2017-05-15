@@ -10,7 +10,7 @@
 
 /*
 ********************************************************************************
-  *1, Application For Vehicle (Horse, Motorcycle, Bicycle, etc)
+  *1, Application For Vehicle (Horse)
   *2, USB For Communication
   *3, 
   ******************************************************************************

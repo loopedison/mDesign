@@ -1,32 +1,58 @@
 /**
   ******************************************************************************
-  * @file    application.h
+  * @file    tsensor.h
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
-  * @brief   Application
+  * @brief   Tsensor
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __APPLICATION_H__
-#define __APPLICATION_H__
+#ifndef __TSENSOR_H__
+#define __TSENSOR_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
+#include "config.h"
+
 /* Exported types ------------------------------------------------------------*/
-typedef enum {
-  APPLICATION_OK            = 0X0,
-  APPLICATION_ERROR         = 0X1,
-}Application_StatusTypeDef;
+typedef struct
+{
+  int32_t       xRate;
+  int32_t       xDirection;
+}Tsensor_DataTypeDef;
 
+typedef struct
+{
+  uint16_t      xPeriod;
+}Tsensor_ParamTypeDef;
 
+typedef struct
+{
+  Tsensor_DataTypeDef   xData;
+  Tsensor_ParamTypeDef  xParam;
+}Tsensor_TypeDef;
 
 /* Exported constants --------------------------------------------------------*/
+/* Exported variables --------------------------------------------------------*/
+extern Tsensor_TypeDef tsensor;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-Application_StatusTypeDef Application_Main(void);
+void Tsensor_Init(void);
+void Tsensor_Task(void const * argument);
+void Tsensor_GetInstance(Tsensor_TypeDef **pSensor);
+void Tsensor_GetData(Tsensor_DataTypeDef *pData);
+void Tsensor_GetParam(Tsensor_ParamTypeDef *pParam);
 
-#endif  /* __APPLICATION_H__ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif  /* __TSENSOR_H__ */
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

@@ -1,16 +1,16 @@
 /**
   ******************************************************************************
-  * @file    superled.h
+  * @file    commander_if.h
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
-  * @brief   superled module
+  * @brief   Commander interface
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __SUPERLED_H__
-#define __SUPERLED_H__
+#ifndef __COMMANDER_IF_H__
+#define __COMMANDER_IF_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,44 +18,25 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "config.h"
+/* Includes ------------------------------------------------------------------*/
+#include "storage_conf.h"
 
 /* Exported types ------------------------------------------------------------*/
-#define SUPERLED_TICK_PERIOD      (1)
-
-typedef enum {
-  SUPERLED_OK              = 0X0,
-  SUPERLED_ERROR           = 0X1,
-}SuperLed_StatusTypeDef;
-
-#define SUPERLED_MSG_LEN          (16)
-#define SUPERLED_PRIO_DEFAULT     (0)
-#define SUPERLED_COUNTER_DEFAULT  (1)
-#define SUPERLED_COUNTER_MAX      ((uint32_t)(-1))
-typedef int32_t SLED_MsgDef[SUPERLED_MSG_LEN];
-typedef uint32_t SuperLed_IdDef;
-typedef struct
-{
-  SuperLed_IdDef          uId;
-  uint32_t                priority;
-  uint32_t                counter;
-  SLED_MsgDef             message;
-}SuperLed_QItemDef;
-
-
 /* Exported constants --------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
+extern const Storage_MsgDataUserConfTypeDef cStorageUserConf;
+extern const Storage_MsgDataUserParamTypeDef cStorageUserParam;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void SuperLed_Init(void);
-void SuperLed_Task(void const * argument);
-SuperLed_StatusTypeDef SuperLed_Display(SuperLed_QItemDef *pLed);
-SuperLed_StatusTypeDef SuperLed_Remove(SuperLed_QItemDef *pLed);
-
+uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen);
+uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen);
+uint32_t Commander_If_AutoUpload(void const * argument);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __SUPERLED_H__ */
+#endif  /* __COMMANDER_IF_H__ */
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

@@ -752,6 +752,16 @@
               <FilePath>..\Modules\src\application.c</FilePath>
             </File>
             <File>
+              <FileName>storage.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\storage.c</FilePath>
+            </File>
+            <File>
+              <FileName>superled.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\superled.c</FilePath>
+            </File>
+            <File>
               <FileName>usbd_cdc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Modules\src\usbd_cdc.c</FilePath>
@@ -772,14 +782,19 @@
               <FilePath>..\Modules\src\usbd_desc.c</FilePath>
             </File>
             <File>
-              <FileName>storage.c</FileName>
+              <FileName>commander.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Modules\src\storage.c</FilePath>
+              <FilePath>..\Modules\src\commander.c</FilePath>
             </File>
             <File>
-              <FileName>superled.c</FileName>
+              <FileName>commander_if.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Modules\src\superled.c</FilePath>
+              <FilePath>..\Modules\src\commander_if.c</FilePath>
+            </File>
+            <File>
+              <FileName>tsensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\tsensor.c</FilePath>
             </File>
           </Files>
         </Group>
