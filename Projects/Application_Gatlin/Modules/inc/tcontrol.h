@@ -1,32 +1,43 @@
 /**
   ******************************************************************************
-  * @file    application.h
+  * @file    tcontrol.h
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
-  * @brief   Application
+  * @brief   tcontrol
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __APPLICATION_H__
-#define __APPLICATION_H__
+#ifndef __TCONTROL_H__
+#define __TCONTROL_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
+#include "config.h"
+
 /* Exported types ------------------------------------------------------------*/
-typedef enum {
-  APPLICATION_OK            = 0X0,
-  APPLICATION_ERROR         = 0X1,
-}Application_StatusTypeDef;
-
-
+typedef struct
+{
+  uint32_t      xMotorRate[2];
+}Tcontrol_TypeDef;
 
 /* Exported constants --------------------------------------------------------*/
+/* Exported variables --------------------------------------------------------*/
+extern Tcontrol_TypeDef tsensorInfo;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-Application_StatusTypeDef Application_Main(void);
+void Tcontrol_Init(void);
+void Tcontrol_Task(void const * argument);
 
-#endif  /* __APPLICATION_H__ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif  /* __TCONTROL_H__ */
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

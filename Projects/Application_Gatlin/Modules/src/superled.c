@@ -136,7 +136,7 @@ void SuperLed_Task(void const * argument)
       if(SuperLed_QList.qBuff[SuperLed_QList.qIndexH].counter > 0)
       {
         SuperLed_Cur.msgIndex = 0;
-        memcpy(&SuperLed_Cur.msg, &SuperLed_QList.qBuff[SuperLed_QList.qIndexH].message, sizeof(SuperLed_QItemDef));
+        memcpy(&SuperLed_Cur.msg, &SuperLed_QList.qBuff[SuperLed_QList.qIndexH].message, sizeof(SLED_MsgDef));
       }
       else
       {
@@ -166,7 +166,6 @@ void SuperLed_Task(void const * argument)
 /**
   * @brief  SuperLed_Display
   * @param  *pLed 
-  * @param  *pId 
   * @retval None 
   */
 SuperLed_StatusTypeDef SuperLed_Display(SuperLed_QItemDef *pLed)
@@ -212,6 +211,12 @@ SuperLed_StatusTypeDef SuperLed_Display(SuperLed_QItemDef *pLed)
   return (SUPERLED_OK);
 }
 
+//==============================================================================
+/**
+  * @brief  SuperLed_Remove
+  * @param  *pLed 
+  * @retval None 
+  */
 SuperLed_StatusTypeDef SuperLed_Remove(SuperLed_QItemDef *pLed)
 {
   if(pLed == NULL)  { return (SUPERLED_ERROR); }

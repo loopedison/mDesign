@@ -806,6 +806,26 @@
               <FileType>1</FileType>
               <FilePath>..\Modules\src\superled.c</FilePath>
             </File>
+            <File>
+              <FileName>commander.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\commander.c</FilePath>
+            </File>
+            <File>
+              <FileName>commander_if.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\commander_if.c</FilePath>
+            </File>
+            <File>
+              <FileName>tcontrol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\tcontrol.c</FilePath>
+            </File>
+            <File>
+              <FileName>tsensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\tsensor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

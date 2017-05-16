@@ -15,6 +15,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "application.h"
 #include "cpu_id.h"
+#include "crc16.h"
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_core.h"
 #include "usbd_desc.h"
@@ -23,6 +24,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "storage.h"
 #include "superled.h"
+#include "commander.h"
+#include "commander_if.h"
+#include "tsensor.h"
+#include "tcontrol.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -43,11 +48,6 @@ const uint32_t SysRunLevel __attribute__((at(SYS_RUN_LEVEL_ADDR))) = 0xffffffff;
 static uint32_t sysCpuId[3] = {0};
 
 //==============================================================================
-/* USB Device Core handle declaration */
-USBD_HandleTypeDef hUsbDeviceFS;
-static USBD_HandleTypeDef *phUsbDev = &hUsbDeviceFS;
-
-//==============================================================================
 /* default led off */
 const SuperLed_QItemDef cLedDefaultRun = 
 {
@@ -58,55 +58,22 @@ const SuperLed_QItemDef cLedDefaultRun =
   .message[2] = 0,
 };
 
-const SuperLed_QItemDef  cLedConnected= 
-{
-  .counter = SUPERLED_COUNTER_MAX,
-  .priority = SUPERLED_PRIO_DEFAULT,
-  .message[0] = 1000,
-  .message[1] = -25,
-  .message[2] = 0,
-};
+static SuperLed_QItemDef sLedSys;
 
 //==============================================================================
-/*  */
+/* system env */
 typedef struct
 {
-  uint32_t    xMLen;      /* len of valid message */
-  uint8_t     xM[64];     /* message string */
-}AppCmd_MsgItemDef;
+  uint8_t                 xStatus;
+  Tsensor_TypeDef         *pSensor;
+  Storage_MsgDataTypeDef  *pStorage;
+}Sys_TypeDef;
 
-typedef struct
-{
-  uint32_t            mBuffRptr;
-  uint32_t            mBuffWptr;
-  AppCmd_MsgItemDef   mBuff[8];
-}AppCmd_MsgBuffDef;
-
-static AppCmd_MsgBuffDef appCmds;
-
-//==============================================================================
-typedef struct
-{
-  uint32_t              xPeriod;
-  uint8_t               *pDataBuff;
-  uint8_t               xDataBuffPtr;
-}AppCmd_SendDef;
-static AppCmd_SendDef appMsg;
-
-//==============================================================================
-/* sensor */
-typedef struct
-{
-  uint32_t      keyState;
-  uint32_t      motorRate[2];
-}Tsensor_InfoDef;
-
-static Tsensor_InfoDef tsensorInfo;
+Sys_TypeDef   sys;
 
 /* Private function prototypes -----------------------------------------------*/
-uint32_t AppCmd_Task(void const * argument);
-uint32_t AppCmd_AutoUpload(void const * argument);
-uint32_t Tsensor_Task(void const * argument);
+const Storage_MsgDataSysTypeDef cStorageSys;
+const Storage_MsgDataSuperTypeDef cStorageSuper;
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -131,11 +98,12 @@ Application_StatusTypeDef Application_Main(void)
     */
   BSP_Init();
   BSP_SYSLED_Init();
-  BSP_UART1_Init();
-  BSP_USBEN_Init();
   
   
-  /* Get Run Level */
+  //=======================================
+  /**
+    * @brief  Get Run Level
+    */
   uint32_t *pRunLevel = (uint32_t *)&SysRunLevel;
   if(*pRunLevel == 0xffffffff)
   {
@@ -194,17 +162,12 @@ Application_StatusTypeDef Application_Main(void)
       while(1)
       {
         HAL_Delay(1600);
-        BSP_SYSLED_On();
-        HAL_Delay(250);
-        BSP_SYSLED_Off();
-        HAL_Delay(50);
-        BSP_SYSLED_On();
-        HAL_Delay(50);
-        BSP_SYSLED_Off();
-        HAL_Delay(50);
+        BSP_SYSLED_On();  HAL_Delay(250);
+        BSP_SYSLED_Off(); HAL_Delay(50);
+        BSP_SYSLED_On();  HAL_Delay(50);
+        BSP_SYSLED_Off(); HAL_Delay(50);
       }
     }
-    
     
     //=======================================
     /**
@@ -212,14 +175,20 @@ Application_StatusTypeDef Application_Main(void)
       */
     if(hStorageMsgData.xFlag == STORAGE_XFLAG_SET)
     {
-////      /*  */
-////      hStorageMsgData.xFlag = STORAGE_XFLAG_RESET;
-////      Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
-////      
-////      /* Generate system reset to allow jumping to the user code */
-////      HAL_Delay(1);
-////      NVIC_SystemReset();
-////      while(1);
+      /* Default Settings */
+      hStorageMsgData.xFlag = STORAGE_XFLAG_RESET;
+      memcpy(&hStorageMsgData.xInfo.xName, "motorcycle", 16);
+      memcpy(&hStorageMsgData.xSys, &cStorageSys, sizeof(Storage_MsgDataSysTypeDef));
+      memcpy(&hStorageMsgData.xSuper, &cStorageSuper, sizeof(Storage_MsgDataSuperTypeDef));
+      memcpy(&hStorageMsgData.xUserConf, &cStorageUserConf, sizeof(Storage_MsgDataUserConfTypeDef));
+      memcpy(&hStorageMsgData.xUserParam, &cStorageUserParam, sizeof(Storage_MsgDataUserParamTypeDef));
+      memcpy(&hStorageMsgData.xSys.xUID, &sysCpuId[0], sizeof(uint32_t));
+      Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
+      
+      /* Generate system reset to allow jumping to the user code */
+      HAL_Delay(10);
+      NVIC_SystemReset();
+      while(1);
     }
     
     
@@ -228,113 +197,62 @@ Application_StatusTypeDef Application_Main(void)
       * @brief  Normal Loop
       */
     /* Init Device */
-    BSP_KEY_Init(KEY1);
-    BSP_KEY_Init(KEY2);
-    BSP_TIM3_Init();
-    BSP_MOTOR_Init();
+    BSP_UART1_Init();
     
-    /* Initialize For Counter */
-    uint32_t usbConnected = 0;
+    /* Initialize Commander */
+    Commander_Init();
     
-    /* Initialize For tsensor */
-    memset(&tsensorInfo, 0, sizeof(Tsensor_InfoDef));
+    /* Initialize Tsensor */
+    Tsensor_Init();
     
-    /* Initialize For Message to Send */
-    appMsg.xPeriod = 50;
-    appMsg.xDataBuffPtr = 0;
-    appMsg.pDataBuff = malloc(32);
-    ASSERT(appMsg.pDataBuff != NULL);
-    
-    /* Init superled */
-    SuperLed_QItemDef sled;
+    /* Initialize Tcontrol */
+    Tcontrol_Init();
     
     /* Init superled */
     SuperLed_Init();
-    memcpy(&sled, &cLedDefaultRun, sizeof(SuperLed_QItemDef));
-    SuperLed_Display(&sled);
+    memcpy(&sLedSys, &cLedDefaultRun, sizeof(SuperLed_QItemDef));
+    SuperLed_Display(&sLedSys);
     
-    
-    /* Disable USB Connection */
-    BSP_USBEN_Off();
-    /* Init Device Library,Add Supported Class and Start the library*/
-    USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
-    USBD_RegisterClass(&hUsbDeviceFS, &USBD_CDC);
-    USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS);
-    USBD_Start(&hUsbDeviceFS);
-    /* Enable USB Connection */
-    BSP_USBEN_On();
-    
-    
-    /* Start Motor */
-    BSP_MOTOR_SetEnable(true);    //turn on
-    BSP_MOTOR_SetDir(0, 1);       //right
-    BSP_MOTOR_SetDir(1, 1);       //right
+    //=======================================
+    /**
+      * @brief  Copy
+      */
+    sys.xStatus   = 0x01;
+    sys.pSensor   = &tsensor;
+    sys.pStorage  = &hStorageMsgData;
     
     
     while(1)
     {
       //=======================================
-      /**
-        * @brief  Led flash Task
-        */
+      //Led flash Task
       SuperLed_Task(NULL);
       
+      //=======================================
+      //Commander Task
+      Commander_Task(NULL);
       
       //=======================================
-      /**
-        * @brief  Cmd Task
-        */
-      AppCmd_Task(NULL);
-      
-      
-      //=======================================
-      /**
-        * @brief  Auto Upload key state
-        */
-      AppCmd_AutoUpload(NULL);
-      
-      
-      //=======================================
-      /**
-        * @brief  Auto Upload key state
-        */
+      //Tsensor Task
       Tsensor_Task(NULL);
       
+      //=======================================
+      //Tcontrol Task
+      Tcontrol_Task(NULL);
       
       //=======================================
-      /**
-        * @brief  Led flash Task
-        */
-      if((usbConnected == 0)&&(phUsbDev->dev_state == USBD_STATE_CONFIGURED))
+      //Upgrade Firmware If Need
+      if(hStorageMsgData.xSys.xUpgrade[0] != 0x0)
       {
-        usbConnected = 1;
-        memcpy(&sled, &cLedConnected, sizeof(SuperLed_QItemDef));
-        SuperLed_Display(&sled);
-      }
-      else if((usbConnected == 1)&&(phUsbDev->dev_state != USBD_STATE_CONFIGURED))
-      {
-        usbConnected = 0;
-        SuperLed_Remove(&sled);
-      }
-      
-      
-      //=======================================
-      /**
-        * @brief  Upgrade Firmware If Need
-        */
-      if(firmwareUpgradeFlag == FIRMWARE_UPGRADE_FLAG_KEYWORD)
-      {
+        firmwareUpgradeFlag = FIRMWARE_UPGRADE_FLAG_KEYWORD;
+        HAL_Delay(100);
         /* Generate system reset to allow jumping to the user code */
-        BSP_USBEN_Off();
-        HAL_Delay(10);
         NVIC_SystemReset();
         while(1);
       }
       
       //=======================================
-      /**
-        * @brief  Enter SLEEP Mode, wakeup by interrupts
-        */
+      //Enter SLEEP Mode, wakeup by interrupts
 //      HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
     }
   }
@@ -343,12 +261,10 @@ Application_StatusTypeDef Application_Main(void)
     /* Failed to Endless */
     while(1)
     {
-      BSP_SYSLED_Toggle();
-      HAL_Delay(25);
+      BSP_SYSLED_Toggle();  HAL_Delay(25);
     }
   }
 }
-
 
 //==============================================================================
 /**
@@ -361,145 +277,39 @@ void HAL_SYSTICK_Callback(void)
 {
 }
 
-
-//==============================================================================
-/**
-  * @brief  USBD_CDC_ReceiveCallback
-  * @param  Buf
-  * @param  Len
-  * @retval none
-  * @note   recode this message to buff
-  */
-int8_t USBD_CDC_ReceiveCallback(uint8_t* Buf, uint32_t *Len)
+//##############################################################################
+//##############################################################################
+#define STORAGE_SYS_PID             (0XFF010003)
+#define STORAGE_SYS_UID             (0XFFFFFFFF)
+#define STORAGE_SYS_SOFT_VER        (0XF101)
+#define STORAGE_SYS_HARD_VER        (0XF110)
+const Storage_MsgDataSysTypeDef cStorageSys =
 {
-  /* Push to Buff */
-  appCmds.mBuff[appCmds.mBuffWptr].xMLen = *Len;
-  memcpy(appCmds.mBuff[appCmds.mBuffWptr].xM, Buf, appCmds.mBuff[appCmds.mBuffWptr].xMLen);
-  appCmds.mBuffWptr ++;
-  if(appCmds.mBuffWptr >= 8) { appCmds.mBuffWptr = 0; }
-  return (0);
-}
+  .xReserved[0]   = 0x00,
+  .xMode[0]       = 0x00,
+  .xPID[0]        = (uint8_t)((STORAGE_SYS_PID)),
+  .xPID[1]        = (uint8_t)((STORAGE_SYS_PID)>>8),
+  .xPID[2]        = (uint8_t)((STORAGE_SYS_PID)>>16),
+  .xPID[3]        = (uint8_t)((STORAGE_SYS_PID)>>24),
+  .xUID[0]        = (uint8_t)((STORAGE_SYS_UID)),
+  .xUID[1]        = (uint8_t)((STORAGE_SYS_UID)>>8),
+  .xUID[2]        = (uint8_t)((STORAGE_SYS_UID)>>16),
+  .xUID[3]        = (uint8_t)((STORAGE_SYS_UID)>>24),
+  .xSoftVer[0]    = (uint8_t)((STORAGE_SYS_SOFT_VER)),
+  .xSoftVer[1]    = (uint8_t)((STORAGE_SYS_SOFT_VER)>>8),
+  .xHardVer[0]    = (uint8_t)((STORAGE_SYS_HARD_VER)),
+  .xHardVer[1]    = (uint8_t)((STORAGE_SYS_HARD_VER)>>8),
+  .xUpgrade[0]    = 0x00,
+  .xRestore[0]    = 0x00,
+};
 
-//==============================================================================
-/**
-  * @brief  AppCmd_Task
-  * @param  argument
-  * @retval none
-  * @note   analysize this message from buff
-  */
-uint32_t AppCmd_Task(void const * argument)
+const Storage_MsgDataSuperTypeDef cStorageSuper =
 {
-  uint32_t cmdCnt;
-  cmdCnt = 8 + appCmds.mBuffWptr - appCmds.mBuffRptr;
-  if(cmdCnt >= 8) {cmdCnt -= 8;}
-  
-  /* Enter Handle If not EMPTY */
-  if(cmdCnt > 0)
-  {
-    AppCmd_MsgItemDef cur;
-    /* Get CMD */
-    memcpy(&cur, &appCmds.mBuff[appCmds.mBuffRptr], sizeof(AppCmd_MsgItemDef));
-    appCmds.mBuffRptr ++;
-    if(appCmds.mBuffRptr >= 8) { appCmds.mBuffRptr = 0; }
-    /*  */
-    
-    if(cur.xMLen >= 4)
-    {
-      if((cur.xM[0] == 0XAB)&&(cur.xM[1]==0X00)&&(cur.xM[2]==0X01)&&(cur.xM[3]==0XAA))
-      {
-        firmwareUpgradeFlag = FIRMWARE_UPGRADE_FLAG_KEYWORD;
-      }
-    }
-  }
-  return (0);
-}
-
-//==============================================================================
-/**
-  * @brief  AppCmd_AutoUpload
-  * @param  argument
-  * @retval none
-  * @note   auto upload
-  */
-uint32_t AppCmd_AutoUpload(void const * argument)
-{
-  static uint32_t tickNew = 0;
-  static uint32_t tickLst = 0;
-  
-  tickNew = HAL_GetTick();
-  if(tickNew - tickLst >= appMsg.xPeriod)
-  {
-    /* Update tick */
-    tickLst = tickNew;
-    
-    /* Upload Message If Connected */
-    appMsg.xDataBuffPtr = 0;
-    appMsg.pDataBuff[appMsg.xDataBuffPtr++] = 0xaa;
-    appMsg.pDataBuff[appMsg.xDataBuffPtr++] = 0x55;
-    appMsg.pDataBuff[appMsg.xDataBuffPtr++] = tsensorInfo.keyState;
-    uint8_t ckByte = 0;
-    for(uint32_t i=0; i<appMsg.xDataBuffPtr; i++)
-    {
-      ckByte ^= appMsg.pDataBuff[i];
-    }
-    appMsg.pDataBuff[appMsg.xDataBuffPtr++] = ckByte;
-    
-    if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED)
-    {
-      CDC_Transmit_FS(appMsg.pDataBuff, appMsg.xDataBuffPtr);
-    }
-    
-    HAL_UART_Transmit(&huart1, appMsg.pDataBuff, appMsg.xDataBuffPtr, 10);
-  }
-  
-  return (0);
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_Task
-  * @param  argument
-  * @retval none
-  */
-uint32_t Tsensor_Task(void const * argument)
-{
-  tsensorInfo.keyState = 0;
-  if(BSP_KEY_Read(KEY1) == true)
-  {
-    tsensorInfo.keyState |= (0x1<<0);
-  }
-  if(BSP_KEY_Read(KEY2) == true)
-  {
-    tsensorInfo.keyState |= (0x1<<1);
-  }
-  
-  static uint32_t tickNew = 0;
-  static uint32_t tickLst = 0;
-  
-  tickNew = HAL_GetTick();
-  if(tickNew - tickLst >= 10)
-  {
-    /* Update tick */
-    tickLst = tickNew;
-    
-    /* Upload Motor */
-    if(tsensorInfo.keyState != 0)
-    {
-      if(tsensorInfo.motorRate[0] <= 95)  {tsensorInfo.motorRate[0] += 5;}
-      if(tsensorInfo.motorRate[1] <= 60)  {tsensorInfo.motorRate[1] += 5;}
-    }
-    else
-    {
-      if(tsensorInfo.motorRate[0] >=  5)  {tsensorInfo.motorRate[0] -= 5;}
-      if(tsensorInfo.motorRate[1] >=  5)  {tsensorInfo.motorRate[1] -= 5;}
-    }
-    
-    BSP_TIM3_SetChannelRate(0, tsensorInfo.motorRate[0]);
-    BSP_TIM3_SetChannelRate(1, tsensorInfo.motorRate[1]);
-  }
-  
-  return (0);
-}
-
+  .xKey[0]        = 0xef,
+  .xKey[1]        = 0xcd,
+  .xKey[2]        = 0xab,
+  .xKey[3]        = 0x89,
+  .xState[0]      = 0x00,
+};
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

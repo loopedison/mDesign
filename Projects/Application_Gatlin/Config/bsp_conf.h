@@ -27,7 +27,7 @@ extern "C" {
 #define BSP_SYSLED_MODULE_ENABLED
 #define BSP_UART1_MODULE_ENABLED
 #define BSP_USBEN_MODULE_ENABLED
-//#define BSP_EXTI_MODULE_ENABLED
+#define BSP_EXTI_MODULE_ENABLED
 //#define BSP_TIM2_MODULE_ENABLED
 //#define BSP_ADC1_MODULE_ENABLED
 #define BSP_KEY_MODULE_ENABLED
@@ -65,7 +65,8 @@ extern "C" {
   #include "bsp_adc1.h"
 //  #define BSP_ADC1_USING_DMA        (1)
 //  #define BSP_ADC1_DMA_PRIO         (5)
-//  #define BSP_ADC1_CHANNEL_NUM      (6)
+  #define BSP_ADC1_CHANNEL_NUM      (4)
+  #define BSP_ADC1_SAMPLETIME       ADC_SAMPLETIME_7CYCLES_5
 #endif /* BSP_ADC1_MODULE_ENABLED */
 
 #ifdef BSP_TIM2_MODULE_ENABLED
