@@ -33,7 +33,7 @@
 /* Private define ------------------------------------------------------------*/
 //##############################################################################
 #define STORAGE_INFO_NAME           "Dragon Fly"
-#define STORAGE_SYS_PID             (0XFF010005)
+#define STORAGE_SYS_PID             (0XFF010300)
 #define STORAGE_SYS_UID             (0XFFFFFFFF)
 #define STORAGE_SYS_SOFT_VER        (0XF100)
 #define STORAGE_SYS_HARD_VER        (0XF110)
@@ -136,16 +136,10 @@ Application_StatusTypeDef Application_Main(void)
       * @brief  First Run To Prepare
       */
     
-    /* Modify Run Flag */
-    HAL_Delay(1);
-    HAL_FLASH_Unlock();
-    HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (SYS_RUN_LEVEL_ADDR), (SYS_RUN_LEVEL_KEYWORD));
-    HAL_FLASH_Lock();
-    
     /* Init Storage get Info */
     Storage_StatusTypeDef status = Storage_ReadInfo(STORAGE_HANDLE, &hStorageInfo);
     /* DeInit Storage Default If storage was EMPTY */
-    if(hStorageInfo.version == 0xffffffff)
+    if(hStorageInfo.version != STORAGE_VERSION)
     {
       HAL_Delay(1);
       const Storage_MsgDataTypeDef cDefaultMsgData = { .xFlag = STORAGE_XFLAG_SET, };
@@ -156,6 +150,12 @@ Application_StatusTypeDef Application_Main(void)
       Storage_WriteIndex(STORAGE_HANDLE, cDefaultIndex);
       Storage_WriteIndexMsgData(STORAGE_HANDLE, 0, (Storage_MsgDataTypeDef *)&cDefaultMsgData);
     }
+    
+    /* Modify Run Flag */
+    HAL_Delay(1);
+    HAL_FLASH_Unlock();
+    HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (SYS_RUN_LEVEL_ADDR), (SYS_RUN_LEVEL_KEYWORD));
+    HAL_FLASH_Lock();
     
     /* Generate system reset to allow jumping to the user code */
     HAL_Delay(1);
@@ -170,28 +170,6 @@ Application_StatusTypeDef Application_Main(void)
       */
     /* Init Storage */
     Storage_StatusTypeDef status = Storage_Init();
-    
-    /* Valid Version Check */
-    if(STORAGE_VERSION > hStorageInfo.version)
-    {
-      /* need upgrade */
-    }
-    else if(STORAGE_VERSION < hStorageInfo.version)
-    {
-      /* error */
-    }
-    
-    if(status != STORAGE_OK)
-    {
-      while(1)
-      {
-        HAL_Delay(1600);
-        BSP_SYSLED_On();  HAL_Delay(250);
-        BSP_SYSLED_Off(); HAL_Delay(50);
-        BSP_SYSLED_On();  HAL_Delay(50);
-        BSP_SYSLED_Off(); HAL_Delay(50);
-      }
-    }
     
     //=======================================
     /**

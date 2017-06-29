@@ -28,11 +28,8 @@ extern "C" {
 #define BSP_UART1_MODULE_ENABLED
 #define BSP_USBEN_MODULE_ENABLED
 //#define BSP_EXTI_MODULE_ENABLED
-//#define BSP_TIM2_MODULE_ENABLED
-//#define BSP_ADC1_MODULE_ENABLED
 #define BSP_KEY_MODULE_ENABLED
 #define BSP_TIM3_MODULE_ENABLED
-//#define BSP_MOTOR_MODULE_ENABLED
 
 #ifdef BSP_SYSLED_MODULE_ENABLED
   #include "bsp_sysLed.h"
@@ -61,20 +58,6 @@ extern "C" {
 //  #define BSP_EXTI95_PRIO              (5)
 #endif /* BSP_EXTI_MODULE_ENABLED */
 
-#ifdef BSP_ADC1_MODULE_ENABLED
-  #include "bsp_adc1.h"
-//  #define BSP_ADC1_USING_DMA        (1)
-//  #define BSP_ADC1_DMA_PRIO         (5)
-  #define BSP_ADC1_CHANNEL_NUM      (4)
-  #define BSP_ADC1_SAMPLETIME       ADC_SAMPLETIME_7CYCLES_5
-#endif /* BSP_ADC1_MODULE_ENABLED */
-
-#ifdef BSP_TIM2_MODULE_ENABLED
-  #include "bsp_tim2.h"
-//  #define BSP_TIM2_DEFAULT_PRESCALER      (72-1)
-  #define BSP_TIM2_DEFAULT_PERIOD         (10000-1)
-#endif /* BSP_TIM2_MODULE_ENABLED */
-
 #ifdef BSP_KEY_MODULE_ENABLED
   #include "bsp_key.h"
   /* see bsp_key.c */
@@ -86,10 +69,6 @@ extern "C" {
   #define TIM3_PWM_DEFAULT_PERIOD       (200)    //5k hz
 //  #define TIM3_PWM_DEFAULT_PULSE        (2)
 #endif /* BSP_TIM3_MODULE_ENABLED */
-
-#ifdef BSP_MOTOR_MODULE_ENABLED
-  #include "bsp_motor.h"
-#endif /* BSP_MOTOR_MODULE_ENABLED */
 
 #ifdef __cplusplus
 }
