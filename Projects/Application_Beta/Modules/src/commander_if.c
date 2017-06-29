@@ -829,15 +829,21 @@ uint32_t Commander_If_AutoUpload(void const * argument)
   static uint32_t tickLst = 0;
   
   tickNew = HAL_GetTick();
-  if(hStorageMsgData.xUserConf.xOE[0] == 0x01)
+  if(tickNew - tickLst >= *(uint16_t *)hStorageMsgData.xUserConf.xPeriod)
   {
-    if(tickNew - tickLst >= *(uint16_t *)hStorageMsgData.xUserConf.xPeriod)
+    /* Update tick */
+    tickLst = tickNew;
+    
+    if(hStorageMsgData.xUserConf.xOE[0] == 0xff)
     {
-      /* Update tick */
-      tickLst = tickNew;
-      
+    }
+    if(hStorageMsgData.xUserConf.xOE[0] == 0xfe)
+    {
+    }
+    else if(hStorageMsgData.xUserConf.xOE[0] >= 0x01)
+    {
       /* Upload Message If Connected */
-      uint8_t atxMsg[16];
+      uint8_t atxMsg[8];
       uint32_t iCnt = 0;
       atxMsg[iCnt++] = (0XF<<4)|CMD_TYPE_UPLOAD;
       atxMsg[iCnt++] = tsensor.xData.xKeyState;

@@ -10,7 +10,7 @@
 
 /*
 ********************************************************************************
-  *1, Application For Vehicle (Motorcycle)
+  *1, Application For Vehicle (Motorcycle Control)
   *2, USB For Communication
   *3, 
   ******************************************************************************
