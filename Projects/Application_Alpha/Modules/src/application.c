@@ -30,6 +30,13 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+//##############################################################################
+#define STORAGE_INFO_NAME           "Horse Control"
+#define STORAGE_SYS_PID             (0XFF010100)
+#define STORAGE_SYS_UID             (0XFFFFFFFF)
+#define STORAGE_SYS_SOFT_VER        (0XF100)
+#define STORAGE_SYS_HARD_VER        (0XF110)
+//##############################################################################
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 #define FIRMWARE_UPGRADE_FLAG_ADDR    (0x20001f00)
@@ -59,21 +66,38 @@ const SuperLed_QItemDef cLedDefaultRun =
 
 static SuperLed_QItemDef sLedSys;
 
-//==============================================================================
-/* system env */
-typedef struct
+//##############################################################################
+const Storage_MsgDataSysTypeDef cStorageSys =
 {
-  uint8_t                 xStatus;
-  Tsensor_TypeDef         *pSensor;
-  Storage_MsgDataTypeDef  *pStorage;
-}Sys_TypeDef;
+  .xReserved[0]   = 0x00,
+  .xMode[0]       = 0x00,
+  .xPID[0]        = (uint8_t)((STORAGE_SYS_PID)),
+  .xPID[1]        = (uint8_t)((STORAGE_SYS_PID)>>8),
+  .xPID[2]        = (uint8_t)((STORAGE_SYS_PID)>>16),
+  .xPID[3]        = (uint8_t)((STORAGE_SYS_PID)>>24),
+  .xUID[0]        = (uint8_t)((STORAGE_SYS_UID)),
+  .xUID[1]        = (uint8_t)((STORAGE_SYS_UID)>>8),
+  .xUID[2]        = (uint8_t)((STORAGE_SYS_UID)>>16),
+  .xUID[3]        = (uint8_t)((STORAGE_SYS_UID)>>24),
+  .xSoftVer[0]    = (uint8_t)((STORAGE_SYS_SOFT_VER)),
+  .xSoftVer[1]    = (uint8_t)((STORAGE_SYS_SOFT_VER)>>8),
+  .xHardVer[0]    = (uint8_t)((STORAGE_SYS_HARD_VER)),
+  .xHardVer[1]    = (uint8_t)((STORAGE_SYS_HARD_VER)>>8),
+  .xUpgrade[0]    = 0x00,
+  .xRestore[0]    = 0x00,
+};
 
-Sys_TypeDef   sys;
+const Storage_MsgDataSuperTypeDef cStorageSuper =
+{
+  .xKey[0]        = 0xef,
+  .xKey[1]        = 0xcd,
+  .xKey[2]        = 0xab,
+  .xKey[3]        = 0x89,
+  .xState[0]      = 0x00,
+};
+//##############################################################################
 
 /* Private function prototypes -----------------------------------------------*/
-const Storage_MsgDataSysTypeDef cStorageSys;
-const Storage_MsgDataSuperTypeDef cStorageSuper;
-
 /* Private functions ---------------------------------------------------------*/
 
 //==============================================================================
@@ -111,16 +135,10 @@ Application_StatusTypeDef Application_Main(void)
       * @brief  First Run To Prepare
       */
     
-    /* Modify Run Flag */
-    HAL_Delay(1);
-    HAL_FLASH_Unlock();
-    HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (SYS_RUN_LEVEL_ADDR), (SYS_RUN_LEVEL_KEYWORD));
-    HAL_FLASH_Lock();
-    
     /* Init Storage get Info */
     Storage_StatusTypeDef status = Storage_ReadInfo(STORAGE_HANDLE, &hStorageInfo);
     /* DeInit Storage Default If storage was EMPTY */
-    if(hStorageInfo.version == 0xffffffff)
+    if(hStorageInfo.version != STORAGE_VERSION)
     {
       HAL_Delay(1);
       const Storage_MsgDataTypeDef cDefaultMsgData = { .xFlag = STORAGE_XFLAG_SET, };
@@ -131,6 +149,12 @@ Application_StatusTypeDef Application_Main(void)
       Storage_WriteIndex(STORAGE_HANDLE, cDefaultIndex);
       Storage_WriteIndexMsgData(STORAGE_HANDLE, 0, (Storage_MsgDataTypeDef *)&cDefaultMsgData);
     }
+    
+    /* Modify Run Flag */
+    HAL_Delay(1);
+    HAL_FLASH_Unlock();
+    HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (SYS_RUN_LEVEL_ADDR), (SYS_RUN_LEVEL_KEYWORD));
+    HAL_FLASH_Lock();
     
     /* Generate system reset to allow jumping to the user code */
     HAL_Delay(1);
@@ -146,28 +170,6 @@ Application_StatusTypeDef Application_Main(void)
     /* Init Storage */
     Storage_StatusTypeDef status = Storage_Init();
     
-    /* Valid Version Check */
-    if(STORAGE_VERSION > hStorageInfo.version)
-    {
-      /* need upgrade */
-    }
-    else if(STORAGE_VERSION < hStorageInfo.version)
-    {
-      /* error */
-    }
-    
-    if(status != STORAGE_OK)
-    {
-      while(1)
-      {
-        HAL_Delay(1600);
-        BSP_SYSLED_On();  HAL_Delay(250);
-        BSP_SYSLED_Off(); HAL_Delay(50);
-        BSP_SYSLED_On();  HAL_Delay(50);
-        BSP_SYSLED_Off(); HAL_Delay(50);
-      }
-    }
-    
     //=======================================
     /**
       * @brief  Check If any task If
@@ -176,7 +178,7 @@ Application_StatusTypeDef Application_Main(void)
     {
       /* Default Settings */
       hStorageMsgData.xFlag = STORAGE_XFLAG_RESET;
-      memcpy(&hStorageMsgData.xInfo.xName, "motorcycle", 16);
+      memcpy(&hStorageMsgData.xInfo.xName, STORAGE_INFO_NAME, 16);
       memcpy(&hStorageMsgData.xSys, &cStorageSys, sizeof(Storage_MsgDataSysTypeDef));
       memcpy(&hStorageMsgData.xSuper, &cStorageSuper, sizeof(Storage_MsgDataSuperTypeDef));
       memcpy(&hStorageMsgData.xUserConf, &cStorageUserConf, sizeof(Storage_MsgDataUserConfTypeDef));
@@ -195,9 +197,6 @@ Application_StatusTypeDef Application_Main(void)
     /**
       * @brief  Normal Loop
       */
-    /* Init Device */
-    BSP_UART1_Init();
-    
     /* Initialize Commander */
     Commander_Init();
     
@@ -208,14 +207,6 @@ Application_StatusTypeDef Application_Main(void)
     SuperLed_Init();
     memcpy(&sLedSys, &cLedDefaultRun, sizeof(SuperLed_QItemDef));
     SuperLed_Display(&sLedSys);
-    
-    //=======================================
-    /**
-      * @brief  Copy
-      */
-    sys.xStatus   = 0x01;
-    sys.pSensor   = &tsensor;
-    sys.pStorage  = &hStorageMsgData;
     
     
     while(1)
@@ -268,40 +259,5 @@ Application_StatusTypeDef Application_Main(void)
 void HAL_SYSTICK_Callback(void)
 {
 }
-
-//##############################################################################
-//##############################################################################
-#define STORAGE_SYS_PID             (0XFF010002)
-#define STORAGE_SYS_UID             (0XFFFFFFFF)
-#define STORAGE_SYS_SOFT_VER        (0XF101)
-#define STORAGE_SYS_HARD_VER        (0XF110)
-const Storage_MsgDataSysTypeDef cStorageSys =
-{
-  .xReserved[0]   = 0x00,
-  .xMode[0]       = 0x00,
-  .xPID[0]        = (uint8_t)((STORAGE_SYS_PID)),
-  .xPID[1]        = (uint8_t)((STORAGE_SYS_PID)>>8),
-  .xPID[2]        = (uint8_t)((STORAGE_SYS_PID)>>16),
-  .xPID[3]        = (uint8_t)((STORAGE_SYS_PID)>>24),
-  .xUID[0]        = (uint8_t)((STORAGE_SYS_UID)),
-  .xUID[1]        = (uint8_t)((STORAGE_SYS_UID)>>8),
-  .xUID[2]        = (uint8_t)((STORAGE_SYS_UID)>>16),
-  .xUID[3]        = (uint8_t)((STORAGE_SYS_UID)>>24),
-  .xSoftVer[0]    = (uint8_t)((STORAGE_SYS_SOFT_VER)),
-  .xSoftVer[1]    = (uint8_t)((STORAGE_SYS_SOFT_VER)>>8),
-  .xHardVer[0]    = (uint8_t)((STORAGE_SYS_HARD_VER)),
-  .xHardVer[1]    = (uint8_t)((STORAGE_SYS_HARD_VER)>>8),
-  .xUpgrade[0]    = 0x00,
-  .xRestore[0]    = 0x00,
-};
-
-const Storage_MsgDataSuperTypeDef cStorageSuper =
-{
-  .xKey[0]        = 0xef,
-  .xKey[1]        = 0xcd,
-  .xKey[2]        = 0xab,
-  .xKey[3]        = 0x89,
-  .xState[0]      = 0x00,
-};
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

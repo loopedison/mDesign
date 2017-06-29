@@ -16,7 +16,7 @@
 #include "stdint.h"
 
 /* Exported define -----------------------------------------------------------*/
-#define STORAGE_VERSION         (0xff010200)
+#define STORAGE_VERSION         (0xff010100)
 #define STORAGE_MSG_ZISE        (0x00000010)
 
 #define STORAGE_XFLAG_SET       (0x89abcdef)
