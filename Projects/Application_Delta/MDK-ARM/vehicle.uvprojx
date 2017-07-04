@@ -796,6 +796,11 @@
               <FileType>1</FileType>
               <FilePath>..\Modules\src\tsensor.c</FilePath>
             </File>
+            <File>
+              <FileName>tcontrol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\tcontrol.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

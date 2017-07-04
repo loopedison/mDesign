@@ -27,6 +27,7 @@
 #include "commander.h"
 #include "commander_if.h"
 #include "tsensor.h"
+#include "tcontrol.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -34,7 +35,7 @@
 #define STORAGE_INFO_NAME           "Coin Counter"
 #define STORAGE_SYS_PID             (0XFF010400)
 #define STORAGE_SYS_UID             (0XFFFFFFFF)
-#define STORAGE_SYS_SOFT_VER        (0XF100)
+#define STORAGE_SYS_SOFT_VER        (0XF110)
 #define STORAGE_SYS_HARD_VER        (0XF110)
 //##############################################################################
 /* Private macro -------------------------------------------------------------*/
@@ -203,6 +204,9 @@ Application_StatusTypeDef Application_Main(void)
     /* Initialize Tsensor */
     Tsensor_Init();
     
+    /* Initialize Tcontrol */
+    Tcontrol_Init();
+    
     /* Init superled */
     SuperLed_Init();
     memcpy(&sLedSys, &cLedDefaultRun, sizeof(SuperLed_QItemDef));
@@ -222,6 +226,10 @@ Application_StatusTypeDef Application_Main(void)
       //=======================================
       //Tsensor Task
       Tsensor_Task(NULL);
+      
+      //=======================================
+      //Tcontrol Task
+      Tcontrol_Task(NULL);
       
       //=======================================
       //Upgrade Firmware If Need

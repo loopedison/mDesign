@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "storage.h"
 #include "tsensor.h"
+#include "tcontrol.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -52,6 +53,8 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
 #define ADDR_USER_CONF_PERIOD       (0X11)
 
 #define ADDR_USER_DATA_COIN         (0X50)
+#define ADDR_USER_DATA_TICKET_ALL   (0X58)
+#define ADDR_USER_DATA_TICKET_CUR   (0X5C)
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -203,6 +206,30 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
       errStatus = CMD_ERR_PARAM;
     }
   }
+  else if(pAddr == ADDR_USER_DATA_TICKET_ALL)
+  {
+    if(pLen == sizeof(uint32_t))
+    {
+      memcpy(pBuff, &tcontroller.xTicketTotal, sizeof(uint32_t));
+      errStatus = CMD_OK;
+    }
+    else
+    {
+      errStatus = CMD_ERR_PARAM;
+    }
+  }
+  else if(pAddr == ADDR_USER_DATA_TICKET_CUR)
+  {
+    if(pLen == sizeof(uint16_t))
+    {
+      memcpy(pBuff, &tcontroller.xTicketCurrent, sizeof(uint16_t));
+      errStatus = CMD_OK;
+    }
+    else
+    {
+      errStatus = CMD_ERR_PARAM;
+    }
+  }
   
   else
   {
@@ -339,6 +366,19 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
     }
   }
   
+  else if(pAddr == ADDR_USER_DATA_TICKET_CUR)
+  {
+    if(pLen == sizeof(uint16_t))
+    {
+      memcpy(&tcontroller.xTicketCurrent, pBuff, sizeof(uint16_t));
+      errStatus = CMD_OK;
+    }
+    else
+    {
+      errStatus = CMD_ERR_PARAM;
+    }
+  }
+  
   else
   {
     errStatus = CMD_ERR_UNSUPPORT;
@@ -416,10 +456,12 @@ uint32_t Commander_If_AutoUpload(void const * argument)
     else if(hStorageMsgData.xUserConf.xOE[0] >= 0x01)
     {
       /* Upload Message If Connected */
-      uint8_t atxMsg[8];
+      uint8_t atxMsg[16];
       uint32_t iCnt = 0;
       atxMsg[iCnt++] = (0XF<<4)|CMD_TYPE_UPLOAD;
       memcpy(&atxMsg[iCnt], &tsensor.xData.xCoin, sizeof(uint32_t));
+      iCnt += sizeof(uint32_t);
+      memcpy(&atxMsg[iCnt], &tcontroller.xTicketTotal, sizeof(uint32_t));
       iCnt += sizeof(uint32_t);
       Commander_AppSend(atxMsg, iCnt);
     }
