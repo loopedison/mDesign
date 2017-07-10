@@ -23,6 +23,7 @@ extern "C" {
 typedef struct
 {
   uint32_t      xCoin;
+  uint8_t       xKey;
 }Tsensor_DataTypeDef;
 
 typedef struct

@@ -52,6 +52,7 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
 #define ADDR_USER_CONF_OE           (0X10)
 #define ADDR_USER_CONF_PERIOD       (0X11)
 
+#define ADDR_USER_DATA_KEY          (0X31)
 #define ADDR_USER_DATA_COIN         (0X50)
 #define ADDR_USER_DATA_TICKET_ALL   (0X58)
 #define ADDR_USER_DATA_TICKET_CUR   (0X5C)
@@ -194,6 +195,18 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
     }
   }
   
+  else if(pAddr == ADDR_USER_DATA_KEY)
+  {
+    if(pLen == sizeof(uint8_t))
+    {
+      memcpy(pBuff, &tsensor.xData.xKey, sizeof(uint8_t));
+      errStatus = CMD_OK;
+    }
+    else
+    {
+      errStatus = CMD_ERR_PARAM;
+    }
+  }
   else if(pAddr == ADDR_USER_DATA_COIN)
   {
     if(pLen == sizeof(uint32_t))
@@ -463,6 +476,7 @@ uint32_t Commander_If_AutoUpload(void const * argument)
       iCnt += sizeof(uint32_t);
       memcpy(&atxMsg[iCnt], &tcontroller.xTicketTotal, sizeof(uint32_t));
       iCnt += sizeof(uint32_t);
+      atxMsg[iCnt++] = (uint8_t)tsensor.xData.xKey;
       Commander_AppSend(atxMsg, iCnt);
     }
   }

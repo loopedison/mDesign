@@ -35,7 +35,7 @@
 #define STORAGE_INFO_NAME           "Coin Counter"
 #define STORAGE_SYS_PID             (0XFF010400)
 #define STORAGE_SYS_UID             (0XFFFFFFFF)
-#define STORAGE_SYS_SOFT_VER        (0XF110)
+#define STORAGE_SYS_SOFT_VER        (0XF120)
 #define STORAGE_SYS_HARD_VER        (0XF110)
 //##############################################################################
 /* Private macro -------------------------------------------------------------*/

@@ -50,6 +50,14 @@ void Tsensor_Init(void)
   BSP_EXTI5_Init();
   BSP_EXTI6_Init();
   
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  
   /* Load Param */
   tsensor.xParam.xPeriod = 1;
   
@@ -124,6 +132,18 @@ void Tsensor_Task(void const * argument)
     
     /* update coin counter */
     tsensor.xData.xCoin = xCoinCounter;
+    
+    /* update key state */
+    tsensor.xData.xKey = 0;
+    if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0) == GPIO_PIN_RESET)
+    {
+      tsensor.xData.xKey |= (0x1<<0);
+    }
+    if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1) == GPIO_PIN_RESET)
+    {
+      tsensor.xData.xKey |= (0x1<<1);
+    }
+    
   }
 }
 
