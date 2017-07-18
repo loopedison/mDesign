@@ -35,7 +35,7 @@
 #define STORAGE_INFO_NAME           "Dragon Fly"
 #define STORAGE_SYS_PID             (0XFF010300)
 #define STORAGE_SYS_UID             (0XFFFFFFFF)
-#define STORAGE_SYS_SOFT_VER        (0XF100)
+#define STORAGE_SYS_SOFT_VER        (0XF101)
 #define STORAGE_SYS_HARD_VER        (0XF110)
 //##############################################################################
 /* Private macro -------------------------------------------------------------*/

@@ -66,7 +66,7 @@ extern "C" {
 #ifdef BSP_TIM3_MODULE_ENABLED
   #include "bsp_tim3.h"
   #define TIM3_PWM_DEFAULT_PRESCALER    (72-1)
-  #define TIM3_PWM_DEFAULT_PERIOD       (200)    //5k hz
+  #define TIM3_PWM_DEFAULT_PERIOD       (1000)    //1k hz
 //  #define TIM3_PWM_DEFAULT_PULSE        (2)
 #endif /* BSP_TIM3_MODULE_ENABLED */
 
