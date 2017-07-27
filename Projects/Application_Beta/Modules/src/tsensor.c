@@ -23,19 +23,15 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 //==============================================================================
+/* sensor */
+Tsensor_TypeDef tsensor;
+
+//==============================================================================
 /* adc vref+ /mv */
 #define ADC_CHANNEL_NUM     BSP_ADC1_CHANNEL_NUM
 /* adc result */
 static uint16_t adcValue[4] = {0};
 static uint32_t adcUpdateFlag = 0;
-
-//==============================================================================
-/* keys value */
-static uint8_t  keyState = 0;
-
-//==============================================================================
-/* sensor */
-Tsensor_TypeDef tsensor;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -74,6 +70,7 @@ void Tsensor_Init(void)
   * @brief  Conversion complete callback in non blocking mode 
   * @param  hadc: ADC handle
   * @retval None
+  * @note   INT mode
   */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -91,65 +88,61 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
   */
 void Tsensor_Task(void const * argument)
 {
-  //handle keystate
-  keyState = 0;
-  if(BSP_EXTI5_ReadState() == GPIO_PIN_RESET)
-  {
-    keyState |= (0x1<<0);
-  }
-  if(BSP_EXTI6_ReadState() == GPIO_PIN_RESET)
-  {
-    keyState |= (0x1<<1);
-  }
-  
-  /* Update Key State */
-  tsensor.xData.xKeyState = keyState;
-  
+  /* Update adcValue , and voltage */
   if(adcUpdateFlag != 0)
   {
     adcUpdateFlag = 0;
-    
-    /* Update adcValue , and voltage */
     for(uint32_t i=0; i<ADC_CHANNEL_NUM; i++)
     {
       /* filter ( aX0+(1-a)X1 ) */
       tsensor.xData.xAdcValue[i] = (0x04*tsensor.xData.xAdcValue[i] + 0x0c*adcValue[i])/0x10;
       tsensor.xData.xAdcVoltage[i] = (tsensor.xParam.xADCref)*(tsensor.xData.xAdcValue[i])/0X1000;
     }
-    
-    /* Update Pitch */
-    if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xPitchMin)
-    {
-      tsensor.xData.xPitch = -100;
-    }
-    else if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xPitchMid)
-    {
-      tsensor.xData.xPitch = -100*(int32_t)(tsensor.xParam.xPitchMid-tsensor.xData.xAdcVoltage[0])/(tsensor.xParam.xPitchMid-tsensor.xParam.xPitchMin);
-    }
-    else if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xPitchMax)
-    {
-      tsensor.xData.xPitch = 100*(int32_t)(tsensor.xData.xAdcVoltage[0]-tsensor.xParam.xPitchMid)/(tsensor.xParam.xPitchMax-tsensor.xParam.xPitchMid);
-    }
-    else
-    {
-      tsensor.xData.xPitch = 100;
-    }
-    
-    /* Update Throttle */
-    if(tsensor.xData.xAdcVoltage[1] < tsensor.xParam.xThroMin)
-    {
-      tsensor.xData.xThrottle = 0;
-    }
-    else if(tsensor.xData.xAdcVoltage[1] < tsensor.xParam.xThroMax)
-    {
-      tsensor.xData.xThrottle = 100*(int32_t)(tsensor.xData.xAdcVoltage[1]-tsensor.xParam.xThroMin)/(tsensor.xParam.xThroMax-tsensor.xParam.xThroMin);
-    }
-    else
-    {
-      tsensor.xData.xThrottle = 100;
-    }
-    /* correct */
-    tsensor.xData.xThrottle = 100-tsensor.xData.xThrottle;
+  }
+  
+  /* Update Pitch */
+  if(tsensor.xData.xAdcValue[0] < tsensor.xParam.xPitchMin)
+  {
+    tsensor.xData.xPitch = -100;
+  }
+  else if(tsensor.xData.xAdcValue[0] < tsensor.xParam.xPitchMid)
+  {
+    tsensor.xData.xPitch = -100*(int32_t)(tsensor.xParam.xPitchMid-tsensor.xData.xAdcValue[0])/(tsensor.xParam.xPitchMid-tsensor.xParam.xPitchMin);
+  }
+  else if(tsensor.xData.xAdcValue[0] < tsensor.xParam.xPitchMax)
+  {
+    tsensor.xData.xPitch =  100*(int32_t)(tsensor.xData.xAdcValue[0]-tsensor.xParam.xPitchMid)/(tsensor.xParam.xPitchMax-tsensor.xParam.xPitchMid);
+  }
+  else
+  {
+    tsensor.xData.xPitch = 100;
+  }
+  
+  /* Update Throttle */
+  if(tsensor.xData.xAdcValue[1] < tsensor.xParam.xThroMin)
+  {
+    tsensor.xData.xThrottle = 0;
+  }
+  else if(tsensor.xData.xAdcValue[1] < tsensor.xParam.xThroMax)
+  {
+    tsensor.xData.xThrottle = 100*(int32_t)(tsensor.xData.xAdcValue[1]-tsensor.xParam.xThroMin)/(tsensor.xParam.xThroMax-tsensor.xParam.xThroMin);
+  }
+  else
+  {
+    tsensor.xData.xThrottle = 100;
+  }
+  /* correct */
+  tsensor.xData.xThrottle = 100-tsensor.xData.xThrottle;
+  
+  /* Update Key State */
+  tsensor.xData.xButton = 0;
+  if(BSP_EXTI5_ReadState() == GPIO_PIN_RESET)
+  {
+    tsensor.xData.xButton |= (0x1<<0);
+  }
+  if(BSP_EXTI6_ReadState() == GPIO_PIN_RESET)
+  {
+    tsensor.xData.xButton |= (0x1<<1);
   }
   
 }

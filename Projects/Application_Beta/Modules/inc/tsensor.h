@@ -25,7 +25,7 @@ typedef struct
   uint16_t      xAdcValue[4];
   uint16_t      xAdcVoltage[4];
   uint8_t       xReserved;
-  uint8_t       xKeyState;
+  uint8_t       xButton;
   int8_t        xPitch;
   int8_t        xThrottle;
 }Tsensor_DataTypeDef;

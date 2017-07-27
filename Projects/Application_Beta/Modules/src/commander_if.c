@@ -27,11 +27,11 @@
 /* Private variables ---------------------------------------------------------*/
 #define CONF_PERIOD         (  20UL)   /* MS */
 #define PARAM_ADC_REF       (3320UL)
-#define PARAM_PITCH_MIN     ( 620UL)
-#define PARAM_PITCH_MID     (1660UL)
-#define PARAM_PITCH_MAX     (2280UL)
-#define PARAM_THRO_MIN      ( 220UL)
-#define PARAM_THRO_MAX      (2250UL)
+#define PARAM_PITCH_MIN     (0X0300)
+#define PARAM_PITCH_MID     (0X0800)
+#define PARAM_PITCH_MAX     (0X0D00)
+#define PARAM_THRO_MIN      (0X0400)
+#define PARAM_THRO_MAX      (0X0C00)
 
 const Storage_MsgDataUserConfTypeDef cStorageUserConf =
 {
@@ -339,7 +339,7 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(uint8_t))
     {
-      memcpy(pBuff, &tsensor.xData.xKeyState, sizeof(uint8_t));
+      memcpy(pBuff, &tsensor.xData.xButton, sizeof(uint8_t));
       errStatus = CMD_OK;
     }
     else
@@ -846,7 +846,7 @@ uint32_t Commander_If_AutoUpload(void const * argument)
       uint8_t atxMsg[8];
       uint32_t iCnt = 0;
       atxMsg[iCnt++] = (0XF<<4)|CMD_TYPE_UPLOAD;
-      atxMsg[iCnt++] = tsensor.xData.xKeyState;
+      atxMsg[iCnt++] = tsensor.xData.xButton;
       atxMsg[iCnt++] = tsensor.xData.xPitch;
       atxMsg[iCnt++] = tsensor.xData.xThrottle;
       Commander_AppSend(atxMsg, iCnt);

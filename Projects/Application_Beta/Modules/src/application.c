@@ -34,7 +34,7 @@
 #define STORAGE_INFO_NAME           "Motorcycle"
 #define STORAGE_SYS_PID             (0XFF010200)
 #define STORAGE_SYS_UID             (0XFFFFFFFF)
-#define STORAGE_SYS_SOFT_VER        (0XF100)
+#define STORAGE_SYS_SOFT_VER        (0XF101)
 #define STORAGE_SYS_HARD_VER        (0XF110)
 //##############################################################################
 /* Private macro -------------------------------------------------------------*/
