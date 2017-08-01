@@ -27,11 +27,11 @@
 /* Private variables ---------------------------------------------------------*/
 #define CONF_PERIOD         (  20UL)   /* MS */
 #define PARAM_ADC_REF       (3320UL)
-#define PARAM_SPEED_MIN     (   2UL)
-#define PARAM_SPEED_MAX     (  20UL)
-#define PARAM_YAW_MIN       ( 620UL)
-#define PARAM_YAW_MID       (1660UL)
-#define PARAM_YAW_MAX       (2280UL)
+#define PARAM_YAW_MIN       (0X0400)
+#define PARAM_YAW_MID       (0X0800)
+#define PARAM_YAW_MAX       (0X0A00)
+#define PARAM_SPEED_MIN     (   1UL)
+#define PARAM_SPEED_MAX     (  10UL)
 
 const Storage_MsgDataUserConfTypeDef cStorageUserConf =
 {
@@ -81,14 +81,14 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
 #define ADDR_USER_DATA_VOLT4        (0X2E)
 #define ADDR_USER_DATA_RESERVED     (0X30)
 #define ADDR_USER_DATA_BUTTON       (0X31)
-#define ADDR_USER_DATA_SPEED        (0X32)
-#define ADDR_USER_DATA_YAW          (0X33)
+#define ADDR_USER_DATA_YAW          (0X32)
+#define ADDR_USER_DATA_SPEED        (0X33)
 #define ADDR_USER_PARAM_ADC_VREF    (0X34)
-#define ADDR_USER_PARAM_SPEED_MIN   (0X36)
-#define ADDR_USER_PARAM_SPEED_MAX   (0X38)
-#define ADDR_USER_PARAM_YAW_MIN     (0X3A)
-#define ADDR_USER_PARAM_YAW_MID     (0X3C)
-#define ADDR_USER_PARAM_YAW_MAX     (0X3E)
+#define ADDR_USER_PARAM_YAW_MIN     (0X36)
+#define ADDR_USER_PARAM_YAW_MID     (0X38)
+#define ADDR_USER_PARAM_YAW_MAX     (0X3A)
+#define ADDR_USER_PARAM_SPEED_MIN   (0X3C)
+#define ADDR_USER_PARAM_SPEED_MAX   (0X3E)
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -348,11 +348,11 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
       errStatus = CMD_ERR_PARAM;
     }
   }
-  else if(pAddr == ADDR_USER_DATA_SPEED)
+  else if(pAddr == ADDR_USER_DATA_YAW)
   {
     if(pLen == sizeof(int8_t))
     {
-      memcpy(pBuff, &tsensor.xData.xSpeed, sizeof(int8_t));
+      memcpy(pBuff, &tsensor.xData.xYaw, sizeof(int8_t));
       errStatus = CMD_OK;
     }
     else
@@ -360,11 +360,11 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
       errStatus = CMD_ERR_PARAM;
     }
   }
-  else if(pAddr == ADDR_USER_DATA_YAW)
+  else if(pAddr == ADDR_USER_DATA_SPEED)
   {
     if(pLen == sizeof(int8_t))
     {
-      memcpy(pBuff, &tsensor.xData.xYaw, sizeof(int8_t));
+      memcpy(pBuff, &tsensor.xData.xSpeed, sizeof(int8_t));
       errStatus = CMD_OK;
     }
     else
@@ -378,30 +378,6 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
     if(pLen == sizeof(uint16_t))
     {
       memcpy(pBuff, &tsensor.xParam.xADCref, sizeof(uint16_t));
-      errStatus = CMD_OK;
-    }
-    else
-    {
-      errStatus = CMD_ERR_PARAM;
-    }
-  }
-  else if(pAddr == ADDR_USER_PARAM_SPEED_MIN)
-  {
-    if(pLen == sizeof(uint16_t))
-    {
-      memcpy(pBuff, &tsensor.xParam.xSpeedMin, sizeof(uint16_t));
-      errStatus = CMD_OK;
-    }
-    else
-    {
-      errStatus = CMD_ERR_PARAM;
-    }
-  }
-  else if(pAddr == ADDR_USER_PARAM_SPEED_MAX)
-  {
-    if(pLen == sizeof(uint16_t))
-    {
-      memcpy(pBuff, &tsensor.xParam.xSpeedMax, sizeof(uint16_t));
       errStatus = CMD_OK;
     }
     else
@@ -438,6 +414,30 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
     if(pLen == sizeof(uint16_t))
     {
       memcpy(pBuff, &tsensor.xParam.xYawMax, sizeof(uint16_t));
+      errStatus = CMD_OK;
+    }
+    else
+    {
+      errStatus = CMD_ERR_PARAM;
+    }
+  }
+  else if(pAddr == ADDR_USER_PARAM_SPEED_MIN)
+  {
+    if(pLen == sizeof(uint16_t))
+    {
+      memcpy(pBuff, &tsensor.xParam.xSpeedMin, sizeof(uint16_t));
+      errStatus = CMD_OK;
+    }
+    else
+    {
+      errStatus = CMD_ERR_PARAM;
+    }
+  }
+  else if(pAddr == ADDR_USER_PARAM_SPEED_MAX)
+  {
+    if(pLen == sizeof(uint16_t))
+    {
+      memcpy(pBuff, &tsensor.xParam.xSpeedMax, sizeof(uint16_t));
       errStatus = CMD_OK;
     }
     else
@@ -616,66 +616,6 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
       errStatus = CMD_ERR_PARAM;
     }
   }
-  else if(pAddr == ADDR_USER_PARAM_SPEED_MIN)
-  {
-    if(pLen == sizeof(uint16_t))
-    {
-      if(hStorageMsgData.xUserConf.xCalcMode != 0)
-      {
-        if((pBuff[0]==0xff)&&(pBuff[1]==0xff))
-        {
-          memcpy(&hStorageMsgData.xUserParam.xParamSpeedMin, &tsensor.xData.xAdcValue[1], sizeof(uint16_t));
-          Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
-          errStatus = CMD_OK;
-        }
-        else
-        {
-          memcpy(&hStorageMsgData.xUserParam.xParamSpeedMin, pBuff, sizeof(uint16_t));
-          Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
-          errStatus = CMD_OK;
-        }
-        memcpy(&tsensor.xParam.xSpeedMin, &hStorageMsgData.xUserParam.xParamSpeedMin, sizeof(uint16_t));
-      }
-      else
-      {
-        errStatus = CMD_ERR_PERM;
-      }
-    }
-    else
-    {
-      errStatus = CMD_ERR_PARAM;
-    }
-  }
-  else if(pAddr == ADDR_USER_PARAM_SPEED_MAX)
-  {
-    if(pLen == sizeof(uint16_t))
-    {
-      if(hStorageMsgData.xUserConf.xCalcMode != 0)
-      {
-        if((pBuff[0]==0xff)&&(pBuff[1]==0xff))
-        {
-          memcpy(&hStorageMsgData.xUserParam.xParamSpeedMax, &tsensor.xData.xAdcValue[1], sizeof(uint16_t));
-          Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
-          errStatus = CMD_OK;
-        }
-        else
-        {
-          memcpy(&hStorageMsgData.xUserParam.xParamSpeedMax, pBuff, sizeof(uint16_t));
-          Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
-          errStatus = CMD_OK;
-        }
-        memcpy(&tsensor.xParam.xSpeedMax, &hStorageMsgData.xUserParam.xParamSpeedMax, sizeof(uint16_t));
-      }
-      else
-      {
-        errStatus = CMD_ERR_PERM;
-      }
-    }
-    else
-    {
-      errStatus = CMD_ERR_PARAM;
-    }
-  }
   else if(pAddr == ADDR_USER_PARAM_YAW_MIN)
   {
     if(pLen == sizeof(uint16_t))
@@ -766,6 +706,66 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
       errStatus = CMD_ERR_PARAM;
     }
   }
+  else if(pAddr == ADDR_USER_PARAM_SPEED_MIN)
+  {
+    if(pLen == sizeof(uint16_t))
+    {
+      if(hStorageMsgData.xUserConf.xCalcMode != 0)
+      {
+        if((pBuff[0]==0xff)&&(pBuff[1]==0xff))
+        {
+          memcpy(&hStorageMsgData.xUserParam.xParamSpeedMin, &tsensor.xData.xAdcValue[1], sizeof(uint16_t));
+          Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
+          errStatus = CMD_OK;
+        }
+        else
+        {
+          memcpy(&hStorageMsgData.xUserParam.xParamSpeedMin, pBuff, sizeof(uint16_t));
+          Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
+          errStatus = CMD_OK;
+        }
+        memcpy(&tsensor.xParam.xSpeedMin, &hStorageMsgData.xUserParam.xParamSpeedMin, sizeof(uint16_t));
+      }
+      else
+      {
+        errStatus = CMD_ERR_PERM;
+      }
+    }
+    else
+    {
+      errStatus = CMD_ERR_PARAM;
+    }
+  }
+  else if(pAddr == ADDR_USER_PARAM_SPEED_MAX)
+  {
+    if(pLen == sizeof(uint16_t))
+    {
+      if(hStorageMsgData.xUserConf.xCalcMode != 0)
+      {
+        if((pBuff[0]==0xff)&&(pBuff[1]==0xff))
+        {
+          memcpy(&hStorageMsgData.xUserParam.xParamSpeedMax, &tsensor.xData.xAdcValue[1], sizeof(uint16_t));
+          Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
+          errStatus = CMD_OK;
+        }
+        else
+        {
+          memcpy(&hStorageMsgData.xUserParam.xParamSpeedMax, pBuff, sizeof(uint16_t));
+          Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
+          errStatus = CMD_OK;
+        }
+        memcpy(&tsensor.xParam.xSpeedMax, &hStorageMsgData.xUserParam.xParamSpeedMax, sizeof(uint16_t));
+      }
+      else
+      {
+        errStatus = CMD_ERR_PERM;
+      }
+    }
+    else
+    {
+      errStatus = CMD_ERR_PARAM;
+    }
+  }
   
   else
   {
@@ -835,11 +835,73 @@ uint32_t Commander_If_AutoUpload(void const * argument)
     /* Update tick */
     tickLst = tickNew;
     
+    //include external variables
+    #include "usbd_core.h"
+    #include "usbd_desc.h"
+    #include "usbd_cdc.h"
+    #include "usbd_cdc_if.h"
+    #include "crc16.h"
+    extern USBD_HandleTypeDef hUsbDeviceFS;
+    
     if(hStorageMsgData.xUserConf.xOE[0] == 0xff)
     {
+      /* Upload Message If Connected */
+      uint8_t atxMsg[16];
+      uint32_t iCnt = 0;
+      int16_t xTemp;
+      atxMsg[iCnt++] = 0x5a;
+      atxMsg[iCnt++] = 0x01;
+      //speed
+      xTemp = 30*tsensor.xData.xSpeed/100;  //limit to 10 rpm
+      memcpy(&atxMsg[iCnt], &xTemp, sizeof(int16_t));
+      iCnt += sizeof(int16_t);
+      //angle
+      xTemp = 60*tsensor.xData.xYaw/100;    //limit to 60 degree
+      memcpy(&atxMsg[iCnt], &xTemp, sizeof(int16_t));
+      iCnt += sizeof(int16_t);
+      //check
+      atxMsg[iCnt++] = 0x01;
+      atxMsg[iCnt++] = 0x01;
+      
+      /* Transfer via usb */
+      if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED)
+      {
+        CDC_Transmit_FS(atxMsg, iCnt);
+      }
     }
     else if(hStorageMsgData.xUserConf.xOE[0] == 0xfe)
     {
+      /* Upload Message If Connected */
+      uint8_t atxMsg[16];
+      uint32_t iCnt = 0;
+      int16_t xTemp;
+      uint8_t xKeys;
+      uint16_t xCrc;
+      atxMsg[iCnt++] = 0x10;
+      atxMsg[iCnt++] = 0xff;
+      atxMsg[iCnt++] = 0x05;
+      //speed
+      xTemp = 30*tsensor.xData.xSpeed/100;  //limit to 10 rpm
+      memcpy(&atxMsg[iCnt], &xTemp, sizeof(int16_t));
+      iCnt += sizeof(int16_t);
+      //angle
+      xTemp = 60*tsensor.xData.xYaw/100;    //limit to 60 degree
+      memcpy(&atxMsg[iCnt], &xTemp, sizeof(int16_t));
+      iCnt += sizeof(int16_t);
+      //button
+      xKeys = (uint8_t)tsensor.xData.xButton&0x03;
+      memcpy(&atxMsg[iCnt], &xKeys, sizeof(uint8_t));
+      iCnt += sizeof(uint8_t);
+      //crc
+      xCrc = CRC16_MODEBUS(atxMsg, iCnt);
+      memcpy(&atxMsg[iCnt], &xCrc, sizeof(int16_t));
+      iCnt += sizeof(int16_t);
+      
+      /* Transfer via usb */
+      if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED)
+      {
+        CDC_Transmit_FS(atxMsg, iCnt);
+      }
     }
     else if(hStorageMsgData.xUserConf.xOE[0] >= 0x01)
     {

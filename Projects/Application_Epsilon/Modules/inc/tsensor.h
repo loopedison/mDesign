@@ -27,18 +27,18 @@ typedef struct
   int32_t       xRateValue;
   uint8_t       xReserved;
   uint8_t       xButton;
-  int8_t        xSpeed;
   int8_t        xYaw;
+  int8_t        xSpeed;
 }Tsensor_DataTypeDef;
 
 typedef struct
 {
   uint16_t      xADCref;
-  uint16_t      xSpeedMin;
-  uint16_t      xSpeedMax;
   uint16_t      xYawMin;
   uint16_t      xYawMid;
   uint16_t      xYawMax;
+  uint16_t      xSpeedMin;
+  uint16_t      xSpeedMax;
 }Tsensor_ParamTypeDef;
 
 typedef struct

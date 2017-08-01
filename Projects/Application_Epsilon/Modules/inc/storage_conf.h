@@ -57,11 +57,11 @@ typedef struct
 typedef struct
 {
   uint8_t                 xParamADCref[2];
-  uint8_t                 xParamSpeedMin[2];
-  uint8_t                 xParamSpeedMax[2];
   uint8_t                 xParamYawMin[2];
   uint8_t                 xParamYawMid[2];
   uint8_t                 xParamYawMax[2];
+  uint8_t                 xParamSpeedMin[2];
+  uint8_t                 xParamSpeedMax[2];
 }Storage_MsgDataUserParamTypeDef;
 
 typedef struct

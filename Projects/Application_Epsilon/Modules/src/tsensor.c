@@ -23,6 +23,10 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 //==============================================================================
+/* sensor */
+Tsensor_TypeDef tsensor;
+
+//==============================================================================
 /* adc vref+ /mv */
 #define ADC_CHANNEL_NUM     BSP_ADC1_CHANNEL_NUM
 /* adc result */
@@ -30,16 +34,12 @@ static uint16_t adcValue[4] = {0};
 static uint32_t adcUpdateFlag = 0;
 
 //==============================================================================
-/* keys value */
-static uint8_t  buttonState = 0;
-
-//==============================================================================
 /* Counter */
 static int32_t  counterValue = 0;
 
 //==============================================================================
 /* rate */
-#define RATE_PERIOD     (1000)    //ms
+#define RATE_PERIOD     (2000)    //ms
 #define RATE_DIV        ( 100)
 #define RATE_DB_SIZE    (RATE_DIV)
 
@@ -53,10 +53,6 @@ typedef struct
   Rate_DataDef          pDB[RATE_DB_SIZE];
 }Rate_TypeDef;
 static Rate_TypeDef     xRate;
-
-//==============================================================================
-/* sensor */
-Tsensor_TypeDef tsensor;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -76,8 +72,6 @@ void Tsensor_Init(void)
   BSP_EXTI6_Init();
   BSP_BUTTON_Init(BUTTON_1);
   BSP_BUTTON_Init(BUTTON_2);
-  BSP_BUTTON_Init(BUTTON_3);
-  BSP_BUTTON_Init(BUTTON_4);
   
   /* Clear tsensor */
   memset(&tsensor, 0, sizeof(Tsensor_TypeDef));
@@ -85,11 +79,11 @@ void Tsensor_Init(void)
   /* Initialize For ADC */
   tsensor.xParam.xADCref    = *(uint16_t *)hStorageMsgData.xUserParam.xParamADCref;
   /* Initialize For tsensor */
-  tsensor.xParam.xSpeedMin  = *(uint16_t *)hStorageMsgData.xUserParam.xParamSpeedMin;
-  tsensor.xParam.xSpeedMax  = *(uint16_t *)hStorageMsgData.xUserParam.xParamSpeedMax;
   tsensor.xParam.xYawMin    = *(uint16_t *)hStorageMsgData.xUserParam.xParamYawMin;
   tsensor.xParam.xYawMid    = *(uint16_t *)hStorageMsgData.xUserParam.xParamYawMid;
   tsensor.xParam.xYawMax    = *(uint16_t *)hStorageMsgData.xUserParam.xParamYawMax;
+  tsensor.xParam.xSpeedMin  = *(uint16_t *)hStorageMsgData.xUserParam.xParamSpeedMin;
+  tsensor.xParam.xSpeedMax  = *(uint16_t *)hStorageMsgData.xUserParam.xParamSpeedMax;
   /* Start ADC */
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcValue, ADC_CHANNEL_NUM);
@@ -170,55 +164,34 @@ uint32_t Tsensor_RateCalc(Rate_TypeDef *pRate, int32_t *pCounter, int32_t *pValu
   */
 void Tsensor_Task(void const * argument)
 {
-  /* Update Key State */
-  buttonState = 0;
-  if(BSP_BUTTON_Read(BUTTON_1) == true)
-  {
-    buttonState |= (0x1<<0);
-  }
-  if(BSP_BUTTON_Read(BUTTON_2) == true)
-  {
-    buttonState |= (0x1<<1);
-  }
-  if(BSP_BUTTON_Read(BUTTON_3) == true)
-  {
-    buttonState |= (0x1<<2);
-  }
-  if(BSP_BUTTON_Read(BUTTON_4) == true)
-  {
-    buttonState |= (0x1<<3);
-  }
-  tsensor.xData.xButton = buttonState;
-  
   /* Update adcValue, voltage, and calc Yaw */
   if(adcUpdateFlag != 0)
   {
     adcUpdateFlag = 0;
-    
     for(uint32_t i=0; i<ADC_CHANNEL_NUM; i++)
     {
       /* filter ( aX0+(1-a)X1 ) */
-      tsensor.xData.xAdcValue[i] = (0x01*tsensor.xData.xAdcValue[i] + 0x03*adcValue[i])/0x04;   //75%
-      tsensor.xData.xAdcVoltage[i] = (tsensor.xParam.xADCref)*(tsensor.xData.xAdcValue[i])/0X1000;
+      tsensor.xData.xAdcValue[i] = (uint32_t)(0x04*tsensor.xData.xAdcValue[i] + 0x0c*adcValue[i])/0x10;   //75%
+      tsensor.xData.xAdcVoltage[i] = (uint32_t)(tsensor.xParam.xADCref)*(tsensor.xData.xAdcValue[i])/0X1000;
     }
-    
-    /* Update Yaw */
-    if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xYawMin)
-    {
-      tsensor.xData.xYaw = -100;
-    }
-    else if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xYawMid)
-    {
-      tsensor.xData.xYaw = -100*(int32_t)(tsensor.xParam.xYawMid-tsensor.xData.xAdcVoltage[0])/(tsensor.xParam.xYawMid-tsensor.xParam.xYawMin);
-    }
-    else if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xYawMax)
-    {
-      tsensor.xData.xYaw = 100*(int32_t)(tsensor.xData.xAdcVoltage[0]-tsensor.xParam.xYawMid)/(tsensor.xParam.xYawMax-tsensor.xParam.xYawMid);
-    }
-    else
-    {
-      tsensor.xData.xYaw = 100;
-    }
+  }
+  
+  /* Update Yaw */
+  if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xYawMin)
+  {
+    tsensor.xData.xYaw = -100;
+  }
+  else if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xYawMid)
+  {
+    tsensor.xData.xYaw = -100*(int32_t)(tsensor.xParam.xYawMid-tsensor.xData.xAdcVoltage[0])/(tsensor.xParam.xYawMid-tsensor.xParam.xYawMin);
+  }
+  else if(tsensor.xData.xAdcVoltage[0] < tsensor.xParam.xYawMax)
+  {
+    tsensor.xData.xYaw = 100*(int32_t)(tsensor.xData.xAdcVoltage[0]-tsensor.xParam.xYawMid)/(tsensor.xParam.xYawMax-tsensor.xParam.xYawMid);
+  }
+  else
+  {
+    tsensor.xData.xYaw = 100;
   }
   
   /* Update rate, Speed */
@@ -235,8 +208,8 @@ void Tsensor_Task(void const * argument)
     }
     else if(tsensor.xData.xRateValue < (-1)*tsensor.xParam.xSpeedMin)
     {
-      tsensor.xData.xSpeed = -100*(-tsensor.xData.xRateValue-tsensor.xParam.xSpeedMin) \
-                                /(tsensor.xParam.xSpeedMax-tsensor.xParam.xSpeedMin);
+      tsensor.xData.xSpeed = -100*(-tsensor.xData.xRateValue-tsensor.xParam.xSpeedMin)  \
+                                  /(tsensor.xParam.xSpeedMax-tsensor.xParam.xSpeedMin);
     }
     else if(tsensor.xData.xRateValue < (1)*tsensor.xParam.xSpeedMin)
     {
@@ -244,14 +217,26 @@ void Tsensor_Task(void const * argument)
     }
     else if(tsensor.xData.xRateValue < (1)*tsensor.xParam.xSpeedMax)
     {
-      tsensor.xData.xSpeed = 100*(tsensor.xData.xRateValue-tsensor.xParam.xSpeedMin)  \
-                                /(tsensor.xParam.xSpeedMax-tsensor.xParam.xSpeedMin);
+      tsensor.xData.xSpeed = 100* (tsensor.xData.xRateValue-tsensor.xParam.xSpeedMin)   \
+                                  /(tsensor.xParam.xSpeedMax-tsensor.xParam.xSpeedMin);
     }
     else
     {
       tsensor.xData.xSpeed = 100;
     }
   }
+  
+  /* Update Key State */
+  tsensor.xData.xButton = 0;
+  if(BSP_BUTTON_Read(BUTTON_1) == true)
+  {
+    tsensor.xData.xButton |= (0x1<<0);
+  }
+  if(BSP_BUTTON_Read(BUTTON_2) == true)
+  {
+    tsensor.xData.xButton |= (0x1<<1);
+  }
+  
 }
 
 //==============================================================================
