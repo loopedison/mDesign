@@ -8,6 +8,7 @@
     4、Application_Delta     工程，PID=0XFF010400，投币器控制，彩票机
     5、Application_Epsilon   工程，PID=0XFF010500，动感单车控制（v2.0，暂不兼容以前版本）
     6、Application_Zeta      工程，PID=0XFF010600，加特林控制
+    7、Application_Eta       工程，PID=0XFF010700，选择器控制
     
     //===============================================
     A、BootLoader            工程，固件升级，可用于远程板卡固件升级
