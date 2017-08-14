@@ -15,6 +15,10 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+#ifndef TIM3_PWM_CHANNEL_NUM
+  #define TIM3_PWM_CHANNEL_NUM          (4)
+#endif /* TIM3_PWM_CHANNEL_NUM */
+
 #ifndef TIM3_PWM_DEFAULT_PRESCALER
   #define TIM3_PWM_DEFAULT_PRESCALER    (72-1)
 #endif /* TIM3_PWM_DEFAULT_PRESCALER */
@@ -63,6 +67,23 @@ BSP_StatusTypeDef BSP_TIM3_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
   
+#if TIM3_PWM_CHANNEL_NUM >= 1
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 2
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 3
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 4
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+#endif
+  
   __HAL_AFIO_REMAP_TIM3_PARTIAL();
   
   /* Peripheral clock enable */
@@ -100,26 +121,30 @@ BSP_StatusTypeDef BSP_TIM3_Init(void)
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   
+#if TIM3_PWM_CHANNEL_NUM >= 1
   /* Set the pulse value for channel 1 */
   sConfigOC.Pulse = TIM3_PWM_DEFAULT_PULSE;
   HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 2
   /* Set the pulse value for channel 2 */
   sConfigOC.Pulse = TIM3_PWM_DEFAULT_PULSE;
   HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 3
   /* Set the pulse value for channel 3 */
   sConfigOC.Pulse = TIM3_PWM_DEFAULT_PULSE;
   HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 4
   /* Set the pulse value for channel 4 */
   sConfigOC.Pulse = TIM3_PWM_DEFAULT_PULSE;
   HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_4);
-  
-  
-  /* Start PWM channels */
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
-  
+#endif
   
   return (status);
 }
@@ -135,7 +160,11 @@ BSP_StatusTypeDef BSP_TIM3_SetChannelPulse(uint32_t timCh, uint32_t timPulse)
 {
   BSP_StatusTypeDef status = BSP_OK;
   
-  if(timPulse < TIM3_PWM_DEFAULT_PERIOD)
+  if(timPulse < TIM3_PWM_DEFAULT_PULSE)
+  {
+    sConfigOC.Pulse = 0;
+  }
+  else if(timPulse < TIM3_PWM_DEFAULT_PERIOD)
   {
     sConfigOC.Pulse = timPulse;
   }
@@ -144,30 +173,38 @@ BSP_StatusTypeDef BSP_TIM3_SetChannelPulse(uint32_t timCh, uint32_t timPulse)
     sConfigOC.Pulse = TIM3_PWM_DEFAULT_PERIOD;
   }
   
-  if     (timCh == 0x0)
+#if TIM3_PWM_CHANNEL_NUM >= 1
+  if(timCh == 0x0)
   {
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
     HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   }
-  else if(timCh == 0x1)
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 2
+  if(timCh == 0x1)
   {
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
     HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   }
-  else if(timCh == 0x2)
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 3
+  if(timCh == 0x2)
   {
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_3);
     HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
   }
-  else if(timCh == 0x3)
+#endif
+#if TIM3_PWM_CHANNEL_NUM >= 4
+  if(timCh == 0x3)
   {
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_4);
     HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_4);
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
   }
+#endif
   
   return (status);
 }
@@ -176,15 +213,15 @@ BSP_StatusTypeDef BSP_TIM3_SetChannelPulse(uint32_t timCh, uint32_t timPulse)
 /**
   * @brief  set TIM3 PWM rate
   * @param  timCh 
-  * @param  rate 
+  * @param  timRate 
   * @retval BSP_OK, normal
   */
-BSP_StatusTypeDef BSP_TIM3_SetChannelRate(uint32_t timCh, uint32_t rate)
+BSP_StatusTypeDef BSP_TIM3_SetChannelRate(uint32_t timCh, uint32_t timRate)
 {
   BSP_StatusTypeDef status = BSP_OK;
-  uint32_t pulse = 0;
-  pulse = rate*TIM3_PWM_DEFAULT_PERIOD/100;
-  status = BSP_TIM3_SetChannelPulse(timCh, pulse);
+  uint32_t tmpSet = (timRate<=100)?(timRate):(100);
+  tmpSet = tmpSet*TIM3_PWM_DEFAULT_PERIOD/100;
+  status = BSP_TIM3_SetChannelPulse(timCh, tmpSet);
   return (status);
 }
 

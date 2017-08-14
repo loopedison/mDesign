@@ -21,21 +21,12 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-typedef enum 
-{
-  KEY1 = 0,
-  KEY2 = 1,
-  KEY3 = 2,
-  KEY4 = 3,
-}KEY_TypeDef;
-
 /* Exported variables --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-BSP_StatusTypeDef BSP_KEY_Init(KEY_TypeDef keyID);
-BSP_StatusTypeDef BSP_KEY_ReadState(KEY_TypeDef keyID, uint32_t *state);
-bool              BSP_KEY_Read(KEY_TypeDef keyID);
-
+BSP_StatusTypeDef BSP_KEY_Init(uint32_t keyID);
+BSP_StatusTypeDef BSP_KEY_ReadState(uint32_t keyID, uint32_t *state);
+bool              BSP_KEY_Read(uint32_t keyID);
 
 #ifdef __cplusplus
 }

@@ -15,8 +15,12 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+#if BSP_EXTI95_USING_INT == 1
+  #define BSP_EXTI95_USING_INT        (1)
+#endif /* BSP_EXTI95_USING_INT */
+
 #ifndef BSP_EXTI95_PRIO
-  #define BSP_EXTI95_PRIO              (5)
+  #define BSP_EXTI95_PRIO             (6)
 #endif /* BSP_EXTI95_PRIO */
 
 /* Private macro -------------------------------------------------------------*/
@@ -39,15 +43,17 @@ BSP_StatusTypeDef BSP_EXTI5_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
   
-  /*Configure GPIO pins : PB0*/
+  /*Configure GPIO pins : PA5*/
   GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   
+#if BSP_EXTI95_USING_INT != 1
   /* Peripheral interrupt init */
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, BSP_EXTI95_PRIO, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+#endif /* BSP_EXTI95_USING_INT */
   
   return (BSP_OK);
 }
@@ -65,39 +71,41 @@ BSP_StatusTypeDef BSP_EXTI6_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
   
-  /*Configure GPIO pins : PB0*/
+  /*Configure GPIO pins : PA6*/
   GPIO_InitStruct.Pin = GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   
+#if BSP_EXTI95_USING_INT != 1
   /* Peripheral interrupt init */
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, BSP_EXTI95_PRIO, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+#endif /* BSP_EXTI95_USING_INT */
   
   return (BSP_OK);
 }
 
 //==============================================================================
 /**
-  * @brief  read exti5 state
+  * @brief  BSP_EXTI5_Read
   * @param  none
   * @retval GPIO PinState
   */
-GPIO_PinState BSP_EXTI5_ReadState(void)
+bool BSP_EXTI5_Read(void)
 {
-  return (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5));
+  return (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_RESET);
 }
 
 //==============================================================================
 /**
-  * @brief  read exti6 state
+  * @brief  BSP_EXTI6_Read
   * @param  none
   * @retval GPIO PinState
   */
-GPIO_PinState BSP_EXTI6_ReadState(void)
+bool BSP_EXTI6_Read(void)
 {
-  return (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6));
+  return (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6) == GPIO_PIN_RESET);
 }
 
 //==============================================================================
@@ -107,11 +115,14 @@ GPIO_PinState BSP_EXTI6_ReadState(void)
   * @retval none
   * @note   interrupt
   */
+#if BSP_EXTI95_USING_INT != 1
 void EXTI9_5_IRQHandler(void)
 {
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);
 }
+#endif /* BSP_EXTI95_USING_INT */
+
 
 #endif /* BSP_EXTI_MODULE_ENABLED */
 

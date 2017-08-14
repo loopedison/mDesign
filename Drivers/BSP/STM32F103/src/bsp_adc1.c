@@ -20,15 +20,15 @@
 #endif /* BSP_ADC1_USING_DMA */
 
 #ifndef BSP_ADC1_DMA_PRIO
-  #define BSP_ADC1_DMA_PRIO         (5)
+  #define BSP_ADC1_DMA_PRIO         (6)
 #endif /* BSP_ADC1_DMA_PRIO */
 
 #ifndef BSP_ADC1_CHANNEL_NUM
-  #define BSP_ADC1_CHANNEL_NUM      (4)
+  #error "Please define BSP_ADC1_CHANNEL_NUM = [1~4]"
 #endif /* BSP_ADC1_CHANNEL_NUM */
 
 #ifndef BSP_ADC1_SAMPLETIME
-  #define BSP_ADC1_SAMPLETIME       ADC_SAMPLETIME_7CYCLES_5
+  #define BSP_ADC1_SAMPLETIME       (ADC_SAMPLETIME_7CYCLES_5)
 #endif /* BSP_ADC1_SAMPLETIME */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,13 +57,28 @@ BSP_StatusTypeDef BSP_ADC1_Init(void)
   PA4     ------> ADC1_IN4 
   */
   GPIO_InitTypeDef GPIO_InitStruct;
-  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  
+#if BSP_ADC1_CHANNEL_NUM >= 1
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#endif
+#if BSP_ADC1_CHANNEL_NUM >= 2
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#endif
+#if BSP_ADC1_CHANNEL_NUM >= 3
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#endif
+#if BSP_ADC1_CHANNEL_NUM >= 4
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#endif
   
   
-#ifdef BSP_ADC1_USING_DMA
+#if BSP_ADC1_USING_DMA == 1
   /* Peripheral DMA init*/
   
   /* DMA controller clock enable */
@@ -105,33 +120,41 @@ BSP_StatusTypeDef BSP_ADC1_Init(void)
   */
   ADC_ChannelConfTypeDef sConfig;
   
+#if BSP_ADC1_CHANNEL_NUM >= 1
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
   sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = 1;
   sConfig.SamplingTime = BSP_ADC1_SAMPLETIME;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+#endif
   
+#if BSP_ADC1_CHANNEL_NUM >= 2
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
   sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = 2;
   sConfig.SamplingTime = BSP_ADC1_SAMPLETIME;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+#endif
   
+#if BSP_ADC1_CHANNEL_NUM >= 3
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
   sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = 3;
   sConfig.SamplingTime = BSP_ADC1_SAMPLETIME;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+#endif
   
+#if BSP_ADC1_CHANNEL_NUM >= 4
   /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
   */
   sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = 4;
   sConfig.SamplingTime = BSP_ADC1_SAMPLETIME;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+#endif
   
   return (BSP_OK);
 }

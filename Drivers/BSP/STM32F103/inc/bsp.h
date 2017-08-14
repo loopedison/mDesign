@@ -27,11 +27,11 @@ extern "C" {
 /* Exported functions ------------------------------------------------------- */
 BSP_StatusTypeDef BSP_Init(void);
 
-#ifdef USE_BSP_ASSERT
-#define BSP_ASSERT(e) \
-        if (e) ;      \
-        else BSP_AssertFail( #e, __FILE__, __LINE__ )
-void BSP_AssertFail(char *exp, char *file, int line);
+#if USE_BSP_ASSERT == 1
+  #define BSP_ASSERT(e) \
+          if (e) ;      \
+          else BSP_AssertFail( #e, __FILE__, __LINE__ )
+  void BSP_AssertFail(char *exp, char *file, int line);
 #endif /* USE_BSP_ASSERT */
 
 #ifdef __cplusplus

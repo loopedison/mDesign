@@ -21,21 +21,12 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-typedef enum 
-{
-  BUTTON_1 = 0,
-  BUTTON_2 = 1,
-  BUTTON_3 = 2,
-  BUTTON_4 = 3,
-}BUTTON_TypeDef;
-
 /* Exported variables --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-BSP_StatusTypeDef BSP_BUTTON_Init(BUTTON_TypeDef buttonID);
-BSP_StatusTypeDef BSP_BUTTON_ReadState(BUTTON_TypeDef buttonID, uint32_t *state);
-bool              BSP_BUTTON_Read(BUTTON_TypeDef buttonID);
-
+BSP_StatusTypeDef BSP_BUTTON_Init(uint32_t buttonID);
+BSP_StatusTypeDef BSP_BUTTON_ReadState(uint32_t buttonID, uint32_t *state);
+bool              BSP_BUTTON_Read(uint32_t buttonID);
 
 #ifdef __cplusplus
 }

@@ -15,9 +15,9 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#ifdef BSP_UART1_USING_DMA
-  #ifndef BSP_UART1_USING_INT
-    #define BSP_UART1_USING_INT
+#if BSP_UART1_USING_DMA == 1
+  #if BSP_UART1_USING_INT != 1
+    #define BSP_UART1_USING_INT       (1)
   #endif /* BSP_UART1_USING_INT */
 #endif /* BSP_UART1_USING_DMA */
 
@@ -25,16 +25,16 @@
   #define BSP_UART1_DEFAULT_BAUDRATE  (115200)
 #endif /* BSP_UART1_DEFAULT_BAUDRATE */
 
-#ifndef BSP_UART1_PRIO
-  #define BSP_UART1_PRIO              (5)
-#endif /* BSP_UART1_PRIO */
+#ifndef BSP_UART1_DEFAULT_PRIO
+  #define BSP_UART1_DEFAULT_PRIO      (6)
+#endif /* BSP_UART1_DEFAULT_PRIO */
 
 #ifndef BSP_UART1_DMA_RX_PRIO
-  #define BSP_UART1_DMA_RX_PRIO       (5)
+  #define BSP_UART1_DMA_RX_PRIO       (6)
 #endif /* BSP_UART1_DMA_RX_PRIO */
 
 #ifndef BSP_UART1_DMA_TX_PRIO
-  #define BSP_UART1_DMA_TX_PRIO       (5)
+  #define BSP_UART1_DMA_TX_PRIO       (6)
 #endif /* BSP_UART1_DMA_TX_PRIO */
 
 /* Private macro -------------------------------------------------------------*/
@@ -80,7 +80,7 @@ BSP_StatusTypeDef BSP_UART1_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   
-#ifdef BSP_UART1_USING_DMA
+#if BSP_UART1_USING_DMA == 1
   /* Peripheral DMA init*/
   
   /* DMA controller clock enable */
@@ -136,9 +136,9 @@ BSP_StatusTypeDef BSP_UART1_Init(void)
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   HAL_UART_Init(&huart1);
   
-#ifdef BSP_UART1_USING_INT
+#if BSP_UART1_USING_INT == 1
   /* Peripheral interrupt init */
-  HAL_NVIC_SetPriority(USART1_IRQn, BSP_UART1_PRIO, 0);
+  HAL_NVIC_SetPriority(USART1_IRQn, BSP_UART1_DEFAULT_PRIO, 0);
   HAL_NVIC_EnableIRQ(USART1_IRQn);
 #endif /* BSP_UART1_USING_INT */
   
@@ -165,7 +165,7 @@ BSP_StatusTypeDef BSP_UART1_SetBaudRate(uint32_t BaudRate)
   * @retval none
   * @note   interrupt
   */
-#ifdef BSP_UART1_USING_INT
+#if BSP_UART1_USING_INT == 1
 void USART1_IRQHandler(void)
 {
   HAL_UART_IRQHandler(&huart1);
@@ -179,7 +179,7 @@ void USART1_IRQHandler(void)
   * @retval none
   * @note   interrupt
   */
-#ifdef BSP_UART1_USING_DMA
+#if BSP_UART1_USING_DMA == 1
 void DMA1_Channel5_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(&hdma_usart1_rx);
@@ -193,7 +193,7 @@ void DMA1_Channel5_IRQHandler(void)
   * @retval none
   * @note   interrupt
   */
-#ifdef BSP_UART1_USING_DMA
+#if BSP_UART1_USING_DMA == 1
 void DMA1_Channel4_IRQHandler(void)
 {
   HAL_DMA_IRQHandler(&hdma_usart1_tx);

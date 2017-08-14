@@ -32,8 +32,7 @@ typedef enum
 {
   BSP_OK        = 0,
   BSP_ERROR     = 1,
-  
-  
+  BSP_WARNING   = 2,
   
 }BSP_StatusTypeDef;
 

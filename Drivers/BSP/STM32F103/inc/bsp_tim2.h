@@ -23,6 +23,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim2;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 BSP_StatusTypeDef   BSP_TIM2_Init(void);

@@ -28,7 +28,7 @@ extern TIM_HandleTypeDef htim3;
 /* Exported functions ------------------------------------------------------- */
 BSP_StatusTypeDef BSP_TIM3_Init(void);
 BSP_StatusTypeDef BSP_TIM3_SetChannelPulse(uint32_t timCh, uint32_t timPulse);
-BSP_StatusTypeDef BSP_TIM3_SetChannelRate(uint32_t timCh, uint32_t rate);
+BSP_StatusTypeDef BSP_TIM3_SetChannelRate(uint32_t timCh, uint32_t timRate);
 
 #ifdef __cplusplus
 }

@@ -35,7 +35,7 @@ BSP_StatusTypeDef BSP_Init(void)
   * @param  none 
   * @retval none
   */
-#ifdef USE_BSP_ASSERT
+#if USE_BSP_ASSERT == 1
 __weak void BSP_AssertFail(char *exp, char *file, int line)
 {
   while(1)
@@ -43,5 +43,6 @@ __weak void BSP_AssertFail(char *exp, char *file, int line)
   }
 }
 #endif //USE_BSP_ASSERT
+
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/
