@@ -42,9 +42,11 @@ const SuperLed_QItemDef  cLedConnected=
 {
   .counter = SUPERLED_COUNTER_MAX,
   .priority = SUPERLED_PRIO_DEFAULT,
-  .message[0] = 1000,
+  .message[0] = 900,
   .message[1] = -25,
-  .message[2] = 0,
+  .message[2] = 100,
+  .message[3] = -25,
+  .message[4] = 0,
 };
 
 static SuperLed_QItemDef sLedUsb;
@@ -237,19 +239,18 @@ uint32_t Commander_TaskTx(void const * argument)
 
 //==============================================================================
 /**
-  * @brief  USBD_CDC_ReceiveCallback
-  * @param  Buf
-  * @param  Len
+  * @brief  Commander_PutRecv
+  * @param  buff
+  * @param  len
   * @retval none
-  * @note   INT mode
   * @note   push data to rxbuff
   */
-int8_t USBD_CDC_ReceiveCallback(uint8_t * Buf, uint32_t * Len)
+int8_t Commander_PutRecv(uint8_t * buff, uint32_t len)
 {
-  for(uint32_t i=0; i<(*Len); i++)
+  for(uint32_t i=0; i<len; i++)
   {
     /* Push to Buff */
-    cmdRxBuff.mBuff[cmdRxBuff.mWptr] = Buf[i];
+    cmdRxBuff.mBuff[cmdRxBuff.mWptr] = buff[i];
     /* Move to Next */
     cmdRxBuff.mWptr ++;
     if(cmdRxBuff.mWptr >= CMD_RXBUFFSIZE) { cmdRxBuff.mWptr -= CMD_RXBUFFSIZE; }
@@ -273,7 +274,7 @@ uint32_t Commander_TaskRx(void const * argument)
   if(cmdMsgCnt >= CMD_RXBUFFSIZE) { cmdMsgCnt -= CMD_RXBUFFSIZE; }
   
   /* Enter Handle If not EMPTY */
-  while(cmdMsgCnt >= 4)
+  if(cmdMsgCnt >= 4)
   {
     /*  */
     cmdMsgState = 0;
@@ -281,6 +282,9 @@ uint32_t Commander_TaskRx(void const * argument)
     //head check
     if( cmdRxBuff.mBuff[cmdRxBuff.mRptr]  == CMD_MSGHEAD)
     {
+      /* Flag Waiting */
+      cmdMsgState = 1;
+      
       if(cmdRxBuff.mRptr != CMD_RXBUFFSIZE-1)           //normal
       {
         cmdFrameRecv.fLength = 4 + cmdRxBuff.mBuff[cmdRxBuff.mRptr + 1];
@@ -307,30 +311,42 @@ uint32_t Commander_TaskRx(void const * argument)
         if(((ck&0xff) == cmdFrameRecv.fData[cmdFrameRecv.fLength-2])&&          \
           (((ck>>8) == cmdFrameRecv.fData[cmdFrameRecv.fLength-1])))
         {
-          /* Flag set */
-          cmdMsgState = 1;
+          /* Flag Complete */
+          cmdMsgState = 2;
           
           /* Found */
           /* POST to app handle */
           Commander_AppRecv(&cmdFrameRecv.fData[2], cmdFrameRecv.fData[1]);
           
-          /* Move to Next */
-          cmdRxBuff.mRptr += cmdFrameRecv.fLength;
-          if(cmdRxBuff.mRptr >= CMD_RXBUFFSIZE) { cmdRxBuff.mRptr -= CMD_RXBUFFSIZE; }
-          /*  */
-          cmdMsgCnt -= cmdFrameRecv.fLength;
+        }
+        else
+        {
+          cmdMsgState = 0;
         }
       }
     }
     
-    /* Found none */
     if(cmdMsgState == 0)
     {
+      /* Found none */
       /* Move to Next */
       cmdRxBuff.mRptr ++;
       if(cmdRxBuff.mRptr >= CMD_RXBUFFSIZE) { cmdRxBuff.mRptr -= CMD_RXBUFFSIZE; }
       /*  */
       cmdMsgCnt --;
+    }
+    else if(cmdMsgState == 1)
+    {
+      /* Waiting */
+    }
+    else if(cmdMsgState == 2)
+    {
+      /* Found Complete */
+      /* Move to Next */
+      cmdRxBuff.mRptr += cmdFrameRecv.fLength;
+      if(cmdRxBuff.mRptr >= CMD_RXBUFFSIZE) { cmdRxBuff.mRptr -= CMD_RXBUFFSIZE; }
+      /*  */
+      cmdMsgCnt -= cmdFrameRecv.fLength;
     }
   }
   
@@ -386,6 +402,21 @@ uint32_t Commander_AppRecv(uint8_t *msgBuff, uint32_t msgLen)
     }
     
   }
+  return (0);
+}
+
+//==============================================================================
+/**
+  * @brief  USBD_CDC_ReceiveCallback
+  * @param  Buf
+  * @param  Len
+  * @retval none
+  * @note   INT mode
+  * @note   push data to rxbuff
+  */
+int8_t USBD_CDC_ReceiveCallback(uint8_t * Buf, uint32_t * Len)
+{
+  Commander_PutRecv(Buf, *Len);
   return (0);
 }
 

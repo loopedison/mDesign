@@ -16,6 +16,7 @@
 #include "tcontrol.h"
 /* Includes ------------------------------------------------------------------*/
 #include "storage.h"
+#include "superled.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -37,12 +38,8 @@ void Tcontrol_Init(void)
 {
   /* Init Device */
   BSP_TIM3_Init();
-  
-  /* Load Param */
-  tcontroller.xMotorRate[0] = 0;
-  tcontroller.xMotorRate[1] = 0;
-  tcontroller.xMotorRate[2] = 0;
-  tcontroller.xMotorRate[3] = 0;
+  /* Loading Param */
+  for(uint32_t i=0; i<2; i++) {tcontroller.xMotorRate[i] = 0;}
 }
 
 //==============================================================================
@@ -57,34 +54,15 @@ void Tcontrol_Task(void const * argument)
   static uint32_t tickLst = 0;
   
   tickNew = HAL_GetTick();
-  if(tickNew - tickLst >= 10)
+  if(tickNew - tickLst >= 1)
   {
     /* Update tick */
     tickLst = tickNew;
     
-    /* Upload Motor */
-    for(uint32_t i=0; i<4; i++)
+    /* Update Motor rate */
+    for(uint32_t i=0; i<2; i++)
     {
-      if(tcontroller.xMotorRate[i] < -100)
-      {
-        //Set Dir -
-        BSP_TIM3_SetChannelRate(i, 100);
-      }
-      else if(tcontroller.xMotorRate[i] < 0)
-      {
-        //Set Dir -
-        BSP_TIM3_SetChannelRate(i, -tcontroller.xMotorRate[i]);
-      }
-      else if(tcontroller.xMotorRate[i] < 100)
-      {
-        //Set Dir +
-        BSP_TIM3_SetChannelRate(i, tcontroller.xMotorRate[i]);
-      }
-      else
-      {
-        //Set Dir +
-        BSP_TIM3_SetChannelRate(i, 100);
-      }
+      BSP_TIM3_SetChannelRate(i, abs(tcontroller.xMotorRate[i]));
     }
   }
 }

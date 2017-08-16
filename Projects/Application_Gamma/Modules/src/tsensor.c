@@ -22,10 +22,6 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 //==============================================================================
-/* Button */
-static uint32_t   xButtonStatus = 0;
-
-//==============================================================================
 /* sensor */
 Tsensor_TypeDef   tsensor;
 
@@ -41,13 +37,10 @@ Tsensor_TypeDef   tsensor;
 void Tsensor_Init(void)
 {
   /* Init Device */
-  BSP_KEY_Init(KEY1);
-  BSP_KEY_Init(KEY2);
-  BSP_KEY_Init(KEY3);
-  BSP_KEY_Init(KEY4);
-  
-  /* Load Param */
-  tsensor.xParam.xPeriod = 1;
+  BSP_BUTTON_Init(0);
+  BSP_BUTTON_Init(1);
+  BSP_BUTTON_Init(2);
+  BSP_BUTTON_Init(3);
 }
 
 //==============================================================================
@@ -61,31 +54,28 @@ void Tsensor_Task(void const * argument)
   static uint32_t tickButton = 0;
   uint32_t tickNew = HAL_GetTick();
   
-  if(tickNew - tickButton >= tsensor.xParam.xPeriod)
+  if(tickNew - tickButton >= 1)
   {
     tickButton = tickNew;
     
     /* update button */
-    xButtonStatus = 0;
-    if((BSP_KEY_Read(KEY1)==true))
+    tsensor.xData.xButton = 0;
+    if(BSP_BUTTON_Read(0))
     {
-      xButtonStatus |= (0x1<<0);
+      tsensor.xData.xButton |= (0x1<<0);
     }
-    if((BSP_KEY_Read(KEY2)==true))
+    if(BSP_BUTTON_Read(1))
     {
-      xButtonStatus |= (0x1<<1);
+      tsensor.xData.xButton |= (0x1<<1);
     }
-    if((BSP_KEY_Read(KEY3)==true))
+    if(BSP_BUTTON_Read(2))
     {
-      xButtonStatus |= (0x1<<2);
+      tsensor.xData.xButton |= (0x1<<2);
     }
-    if((BSP_KEY_Read(KEY4)==true))
+    if(BSP_BUTTON_Read(3))
     {
-      xButtonStatus |= (0x1<<3);
+      tsensor.xData.xButton |= (0x1<<3);
     }
-    
-    /* update sensor */
-    tsensor.xData.xKey = xButtonStatus;
   }
 }
 

@@ -18,11 +18,6 @@
 #include "cpu_id.h"
 #include "crc16.h"
 /* Includes ------------------------------------------------------------------*/
-#include "usbd_core.h"
-#include "usbd_desc.h"
-#include "usbd_cdc.h"
-#include "usbd_cdc_if.h"
-/* Includes ------------------------------------------------------------------*/
 #include "storage.h"
 #include "tsensor.h"
 #include "tcontrol.h"
@@ -45,6 +40,7 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
   .xReserved[0]       = (uint8_t)((0)),
 };
 
+
 #define ADDR_SYS_RESERVED           (0X00)
 #define ADDR_SYS_MODE               (0X01)
 #define ADDR_SYS_PID                (0X02)
@@ -57,7 +53,7 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
 #define ADDR_USER_CONF_OE           (0X10)
 #define ADDR_USER_CONF_PERIOD       (0X11)
 
-#define ADDR_USER_DATA_KEY          (0X31)
+#define ADDR_USER_DATA_BUTTON       (0X31)
 #define ADDR_USER_DATA_MOTOR_0      (0X40)
 #define ADDR_USER_DATA_MOTOR_1      (0X41)
 #define ADDR_USER_DATA_MOTOR_2      (0X42)
@@ -201,11 +197,11 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
     }
   }
   
-  else if(pAddr == ADDR_USER_DATA_KEY)
+  else if(pAddr == ADDR_USER_DATA_BUTTON)
   {
     if(pLen == sizeof(uint8_t))
     {
-      uint8_t xKeys = (uint8_t)tsensor.xData.xKey;
+      uint8_t xKeys = (uint8_t)tsensor.xData.xButton;
       memcpy(pBuff, &xKeys, sizeof(uint8_t));
       errStatus = CMD_OK;
     }
@@ -531,7 +527,7 @@ uint32_t Commander_If_AutoUpload(void const * argument)
       uint8_t atxMsg[8];
       uint32_t iCnt = 0;
       atxMsg[iCnt++] = (0XF<<4)|CMD_TYPE_UPLOAD;
-      atxMsg[iCnt++] = (uint8_t)tsensor.xData.xKey;
+      atxMsg[iCnt++] = (uint8_t)tsensor.xData.xButton;
       Commander_AppSend(atxMsg, iCnt);
     }
   }

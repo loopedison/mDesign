@@ -22,12 +22,12 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 typedef struct
 {
-  uint32_t      xKey;
+  uint8_t       xButton;
 }Tsensor_DataTypeDef;
 
 typedef struct
 {
-  uint16_t      xPeriod;
+  uint8_t       xReserved;
 }Tsensor_ParamTypeDef;
 
 typedef struct
