@@ -31,8 +31,9 @@ extern "C" {
 #define BSP_ADC1_MODULE_ENABLED
 #define BSP_TIM2_MODULE_ENABLED
 #define BSP_TIM3_MODULE_ENABLED
+#define BSP_I2C1_MODULE_ENABLED
 #define BSP_BUTTON_MODULE_ENABLED
-#define BSP_KEY_MODULE_ENABLED
+#define BSP_LEDOUT_MODULE_ENABLED
 
 /* Module Configure --------------------------------------------------------- */
 #ifdef BSP_SYSLED_MODULE_ENABLED
@@ -71,7 +72,7 @@ extern "C" {
   #include "bsp_adc1.h"
   #define BSP_ADC1_USING_DMA            (1)
   #define BSP_ADC1_DMA_PRIO             (6)
-  #define BSP_ADC1_CHANNEL_NUM          (4)
+  #define BSP_ADC1_CHANNEL_NUM          (4)         //channel
   #define BSP_ADC1_SAMPLETIME           (ADC_SAMPLETIME_7CYCLES_5)
 #endif /* BSP_ADC1_MODULE_ENABLED */
 
@@ -86,8 +87,13 @@ extern "C" {
   #define TIM3_PWM_DEFAULT_PRESCALER    (72-1)
   #define TIM3_PWM_DEFAULT_PERIOD       (1000-1)    //1k hz
   #define TIM3_PWM_DEFAULT_PULSE        (2)
-  #define TIM3_PWM_CHANNEL_NUM          (4)
+  #define TIM3_PWM_CHANNEL_NUM          (4)         //channel
 #endif /* BSP_TIM3_MODULE_ENABLED */
+
+#ifdef BSP_I2C1_MODULE_ENABLED
+  #include "bsp_i2c1.h"
+  #define I2C1_DEFAULT_SPEED            (400000)
+#endif /* BSP_I2C1_MODULE_ENABLED */
 
 #ifdef BSP_BUTTON_MODULE_ENABLED
   #include "bsp_button.h"
@@ -110,34 +116,52 @@ extern "C" {
   #define BUTTON_5_GPIO_PIN             GPIO_PIN_6
   #define BUTTON_5_GPIO_PORT            GPIOA
   #define BUTTON_6_CONFIG               (1)
-  #define BUTTON_6_GPIO_PIN             GPIO_PIN_0
+  #define BUTTON_6_GPIO_PIN             GPIO_PIN_4
   #define BUTTON_6_GPIO_PORT            GPIOB
   #define BUTTON_7_CONFIG               (1)
-  #define BUTTON_7_GPIO_PIN             GPIO_PIN_1
+  #define BUTTON_7_GPIO_PIN             GPIO_PIN_5
   #define BUTTON_7_GPIO_PORT            GPIOB
   #define BUTTON_8_CONFIG               (1)
-  #define BUTTON_8_GPIO_PIN             GPIO_PIN_4
+  #define BUTTON_8_GPIO_PIN             GPIO_PIN_0
   #define BUTTON_8_GPIO_PORT            GPIOB
   #define BUTTON_9_CONFIG               (1)
-  #define BUTTON_9_GPIO_PIN             GPIO_PIN_5
+  #define BUTTON_9_GPIO_PIN             GPIO_PIN_1
   #define BUTTON_9_GPIO_PORT            GPIOB
 #endif /* BSP_BUTTON_MODULE_ENABLED */
 
-#ifdef BSP_KEY_MODULE_ENABLED
-  #include "bsp_key.h"
-  #define KEY_0_CONFIG                  (1)
-  #define KEY_0_GPIO_PIN                GPIO_PIN_6
-  #define KEY_0_GPIO_PORT               GPIOB
-  #define KEY_1_CONFIG                  (1)
-  #define KEY_1_GPIO_PIN                GPIO_PIN_7
-  #define KEY_1_GPIO_PORT               GPIOB
-  #define KEY_2_CONFIG                  (1)
-  #define KEY_2_GPIO_PIN                GPIO_PIN_8
-  #define KEY_2_GPIO_PORT               GPIOB
-  #define KEY_3_CONFIG                  (1)
-  #define KEY_3_GPIO_PIN                GPIO_PIN_9
-  #define KEY_3_GPIO_PORT               GPIOB
-#endif /* BSP_KEY_MODULE_ENABLED */
+#ifdef BSP_LEDOUT_MODULE_ENABLED
+  #include "bsp_ledout.h"
+  #define LEDOUT_0_CONFIG               (1)
+  #define LEDOUT_0_GPIO_PIN             GPIO_PIN_1
+  #define LEDOUT_0_GPIO_PORT            GPIOA
+  #define LEDOUT_1_CONFIG               (1)
+  #define LEDOUT_1_GPIO_PIN             GPIO_PIN_2
+  #define LEDOUT_1_GPIO_PORT            GPIOA
+  #define LEDOUT_2_CONFIG               (1)
+  #define LEDOUT_2_GPIO_PIN             GPIO_PIN_3
+  #define LEDOUT_2_GPIO_PORT            GPIOA
+  #define LEDOUT_3_CONFIG               (1)
+  #define LEDOUT_3_GPIO_PIN             GPIO_PIN_4
+  #define LEDOUT_3_GPIO_PORT            GPIOA
+  #define LEDOUT_4_CONFIG               (1)
+  #define LEDOUT_4_GPIO_PIN             GPIO_PIN_5
+  #define LEDOUT_4_GPIO_PORT            GPIOA
+  #define LEDOUT_5_CONFIG               (1)
+  #define LEDOUT_5_GPIO_PIN             GPIO_PIN_6
+  #define LEDOUT_5_GPIO_PORT            GPIOA
+  #define LEDOUT_6_CONFIG               (1)
+  #define LEDOUT_6_GPIO_PIN             GPIO_PIN_4
+  #define LEDOUT_6_GPIO_PORT            GPIOB
+  #define LEDOUT_7_CONFIG               (1)
+  #define LEDOUT_7_GPIO_PIN             GPIO_PIN_5
+  #define LEDOUT_7_GPIO_PORT            GPIOB
+  #define LEDOUT_8_CONFIG               (1)
+  #define LEDOUT_8_GPIO_PIN             GPIO_PIN_0
+  #define LEDOUT_8_GPIO_PORT            GPIOB
+  #define LEDOUT_9_CONFIG               (1)
+  #define LEDOUT_9_GPIO_PIN             GPIO_PIN_1
+  #define LEDOUT_9_GPIO_PORT            GPIOB
+#endif /* BSP_LEDOUT_MODULE_ENABLED */
 
 #ifdef __cplusplus
 }

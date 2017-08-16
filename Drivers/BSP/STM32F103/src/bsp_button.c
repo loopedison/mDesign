@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    bsp_button.h
+  * @file    bsp_button.c
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
@@ -46,22 +46,22 @@
 #endif /* BUTTON_5_CONFIG */
 
 #ifndef BUTTON_6_CONFIG
-  #define BUTTON_6_GPIO_PIN               GPIO_PIN_0
+  #define BUTTON_6_GPIO_PIN               GPIO_PIN_4
   #define BUTTON_6_GPIO_PORT              GPIOB
 #endif /* BUTTON_6_CONFIG */
 
 #ifndef BUTTON_7_CONFIG
-  #define BUTTON_7_GPIO_PIN               GPIO_PIN_1
+  #define BUTTON_7_GPIO_PIN               GPIO_PIN_5
   #define BUTTON_7_GPIO_PORT              GPIOB
 #endif /* BUTTON_7_CONFIG */
 
 #ifndef BUTTON_8_CONFIG
-  #define BUTTON_8_GPIO_PIN               GPIO_PIN_4
+  #define BUTTON_8_GPIO_PIN               GPIO_PIN_0
   #define BUTTON_8_GPIO_PORT              GPIOB
 #endif /* BUTTON_8_CONFIG */
 
 #ifndef BUTTON_9_CONFIG
-  #define BUTTON_9_GPIO_PIN               GPIO_PIN_5
+  #define BUTTON_9_GPIO_PIN               GPIO_PIN_1
   #define BUTTON_9_GPIO_PORT              GPIOB
 #endif /* BUTTON_9_CONFIG */
 
