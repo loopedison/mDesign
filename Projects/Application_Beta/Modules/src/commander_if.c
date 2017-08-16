@@ -79,7 +79,7 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
 #define ADDR_USER_DATA_VOLT2        (0X2A)
 #define ADDR_USER_DATA_VOLT3        (0X2C)
 #define ADDR_USER_DATA_VOLT4        (0X2E)
-#define ADDR_USER_DATA_KEY          (0X31)
+#define ADDR_USER_DATA_BUTTON       (0X31)
 #define ADDR_USER_DATA_PITCH        (0X32)
 #define ADDR_USER_DATA_THROTTLE     (0X33)
 #define ADDR_USER_PARAM_ADC_VREF    (0X34)
@@ -335,7 +335,7 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
       errStatus = CMD_ERR_PARAM;
     }
   }
-  else if(pAddr == ADDR_USER_DATA_KEY)
+  else if(pAddr == ADDR_USER_DATA_BUTTON)
   {
     if(pLen == sizeof(uint8_t))
     {

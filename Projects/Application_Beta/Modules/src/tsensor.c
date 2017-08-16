@@ -30,7 +30,7 @@ Tsensor_TypeDef tsensor;
 /* adc vref+ /mv */
 #define ADC_CHANNEL_NUM     BSP_ADC1_CHANNEL_NUM
 /* adc result */
-static uint16_t adcValue[4] = {0};
+static uint16_t adcValue[ADC_CHANNEL_NUM] = {0};
 static uint32_t adcUpdateFlag = 0;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -45,10 +45,10 @@ static uint32_t adcUpdateFlag = 0;
 void Tsensor_Init(void)
 {
   /* Init Device */
-  BSP_TIM2_Init();
   BSP_ADC1_Init();
-  BSP_EXTI5_Init();
-  BSP_EXTI6_Init();
+  BSP_TIM2_Init();
+  BSP_BUTTON_Init(4);
+  BSP_BUTTON_Init(5);
   
   /* Initialize For ADC */
   tsensor.xParam.xADCref    = *(uint16_t *)hStorageMsgData.xUserParam.xParamADCref;
@@ -134,19 +134,18 @@ void Tsensor_Task(void const * argument)
   /* correct */
   tsensor.xData.xThrottle = 100-tsensor.xData.xThrottle;
   
-  /* Update Key State */
+  /* Update Button State */
   tsensor.xData.xButton = 0;
-  if(BSP_EXTI5_ReadState() == GPIO_PIN_RESET)
+  if(BSP_BUTTON_Read(4))
   {
     tsensor.xData.xButton |= (0x1<<0);
   }
-  if(BSP_EXTI6_ReadState() == GPIO_PIN_RESET)
+  if(BSP_BUTTON_Read(5))
   {
     tsensor.xData.xButton |= (0x1<<1);
   }
   
 }
-
 
 //==============================================================================
 /**
