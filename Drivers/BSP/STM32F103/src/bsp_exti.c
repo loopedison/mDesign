@@ -49,7 +49,7 @@ BSP_StatusTypeDef BSP_EXTI5_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   
-#if BSP_EXTI95_USING_INT != 1
+#if BSP_EXTI95_USING_INT == 1
   /* Peripheral interrupt init */
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, BSP_EXTI95_PRIO, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
@@ -77,7 +77,7 @@ BSP_StatusTypeDef BSP_EXTI6_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   
-#if BSP_EXTI95_USING_INT != 1
+#if BSP_EXTI95_USING_INT == 1
   /* Peripheral interrupt init */
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, BSP_EXTI95_PRIO, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
@@ -115,7 +115,7 @@ bool BSP_EXTI6_Read(void)
   * @retval none
   * @note   interrupt
   */
-#if BSP_EXTI95_USING_INT != 1
+#if BSP_EXTI95_USING_INT == 1
 void EXTI9_5_IRQHandler(void)
 {
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_5);
