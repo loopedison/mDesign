@@ -35,20 +35,31 @@
 #define STORAGE_INFO_NAME           "Coin Counter"
 #define STORAGE_SYS_PID             (0XFF010400)
 #define STORAGE_SYS_UID             (0XFFFFFFFF)
-#define STORAGE_SYS_SOFT_VER        (0XF120)
-#define STORAGE_SYS_HARD_VER        (0XF110)
+#define STORAGE_SYS_SOFT_VER        (0XF130)
+#define STORAGE_SYS_HARD_VER        (0XF120)
 //##############################################################################
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-#define FIRMWARE_UPGRADE_FLAG_ADDR    (0x20001f00)
-#define FIRMWARE_UPGRADE_FLAG_KEYWORD (0XCDEF89AB)
-volatile uint32_t firmwareUpgradeFlag __attribute__((at(FIRMWARE_UPGRADE_FLAG_ADDR)));
+//==============================================================================
+/* Firmware Upgrade Flag */
+#if (APPLICATION_OFFSET == 0x00008000)
+  #define FIRMWARE_UPGRADE_FLAG_ADDR    (0x20001f00)
+  #define FIRMWARE_UPGRADE_FLAG_KEYWORD (0XCDEF89AB)
+  volatile uint32_t firmwareUpgradeFlag __attribute__((at(FIRMWARE_UPGRADE_FLAG_ADDR)));
+#endif
 
 //==============================================================================
-/* Sys Run Level at Flash 0x0800a000 */
-#define SYS_RUN_LEVEL_ADDR            (0x0800a000)
-#define SYS_RUN_LEVEL_KEYWORD         (0XCDEF89AB)
-const uint32_t SysRunLevel __attribute__((at(SYS_RUN_LEVEL_ADDR))) = 0xffffffff;
+/* Sys Run Level */
+#if (APPLICATION_OFFSET == 0x00008000)
+  /* Sys Run Level at Flash 0x0800a000 */
+  #define SYS_RUN_LEVEL_ADDR            (0x0800a000)
+  #define SYS_RUN_LEVEL_KEYWORD         (0XCDEF89AB)
+  const uint32_t SysRunLevel __attribute__((at(SYS_RUN_LEVEL_ADDR))) = 0xffffffff;
+#else
+  #define SYS_RUN_LEVEL_ADDR            (0x08004000)
+  #define SYS_RUN_LEVEL_KEYWORD         (0XCDEF89AB)
+  const uint32_t SysRunLevel __attribute__((at(SYS_RUN_LEVEL_ADDR))) = 0xffffffff;
+#endif
 
 //==============================================================================
 /* cpu id */
@@ -235,7 +246,10 @@ Application_StatusTypeDef Application_Main(void)
       //Upgrade Firmware If Need
       if(hStorageMsgData.xSys.xUpgrade[0] != 0x0)
       {
+/* Firmware Upgrade Flag */
+#if (APPLICATION_OFFSET != 0x00000000)
         firmwareUpgradeFlag = FIRMWARE_UPGRADE_FLAG_KEYWORD;
+#endif
         HAL_Delay(100);
         /* Generate system reset to allow jumping to the user code */
         NVIC_SystemReset();

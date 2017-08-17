@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    commander_if.h
+  * @file    commander_if.c
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
@@ -40,6 +40,7 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
   .xReserved[0]       = (uint8_t)((0)),
 };
 
+
 #define ADDR_SYS_RESERVED           (0X00)
 #define ADDR_SYS_MODE               (0X01)
 #define ADDR_SYS_PID                (0X02)
@@ -52,11 +53,10 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
 #define ADDR_USER_CONF_OE           (0X10)
 #define ADDR_USER_CONF_PERIOD       (0X11)
 
-#define ADDR_USER_DATA_KEY          (0X31)
+#define ADDR_USER_DATA_BUTTON       (0X31)
 #define ADDR_USER_DATA_COIN         (0X50)
 #define ADDR_USER_DATA_TICKET_ALL   (0X58)
 #define ADDR_USER_DATA_TICKET_CUR   (0X5C)
-
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -195,11 +195,11 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
     }
   }
   
-  else if(pAddr == ADDR_USER_DATA_KEY)
+  else if(pAddr == ADDR_USER_DATA_BUTTON)
   {
     if(pLen == sizeof(uint8_t))
     {
-      memcpy(pBuff, &tsensor.xData.xKey, sizeof(uint8_t));
+      memcpy(pBuff, &tsensor.xData.xButton, sizeof(uint8_t));
       errStatus = CMD_OK;
     }
     else
@@ -476,7 +476,7 @@ uint32_t Commander_If_AutoUpload(void const * argument)
       iCnt += sizeof(uint32_t);
       memcpy(&atxMsg[iCnt], &tcontroller.xTicketTotal, sizeof(uint32_t));
       iCnt += sizeof(uint32_t);
-      atxMsg[iCnt++] = (uint8_t)tsensor.xData.xKey;
+      atxMsg[iCnt++] = (uint8_t)tsensor.xData.xButton;
       Commander_AppSend(atxMsg, iCnt);
     }
   }

@@ -23,12 +23,12 @@ extern "C" {
 typedef struct
 {
   uint32_t      xCoin;
-  uint8_t       xKey;
+  uint8_t       xButton;
 }Tsensor_DataTypeDef;
 
 typedef struct
 {
-  uint16_t      xPeriod;
+  uint8_t       xReserved;
 }Tsensor_ParamTypeDef;
 
 typedef struct
@@ -45,9 +45,6 @@ extern Tsensor_TypeDef tsensor;
 /* Exported functions ------------------------------------------------------- */
 void Tsensor_Init(void);
 void Tsensor_Task(void const * argument);
-void Tsensor_GetInstance(Tsensor_TypeDef **pSensor);
-void Tsensor_GetData(Tsensor_DataTypeDef *pData);
-void Tsensor_GetParam(Tsensor_ParamTypeDef *pParam);
 
 #ifdef __cplusplus
 }

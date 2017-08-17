@@ -22,18 +22,14 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 //==============================================================================
-/* Coin Pluse >=20ms */
-#define S_IDLE    (0X0)
-#define S_BUSY    (0X1)
-#define S_DONE    (0X2)
-static uint32_t   xCntState;
-static uint32_t   xCntY, xCntN;
-static uint32_t   xCoinCounter;
-static uint32_t   xCoinError;
-
-//==============================================================================
 /* sensor */
 Tsensor_TypeDef   tsensor;
+
+//==============================================================================
+/* Coin Pluse >=20ms */
+static uint32_t   xCntState=0;
+static uint32_t   xCntY=0, xCntN=0;
+static uint32_t   xCoinCounter=0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -47,23 +43,17 @@ Tsensor_TypeDef   tsensor;
 void Tsensor_Init(void)
 {
   /* Init Device */
-  BSP_EXTI5_Init();
-  BSP_EXTI6_Init();
-  
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  GPIO_InitTypeDef GPIO_InitStruct;
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  BSP_BUTTON_Init(0);
+  BSP_BUTTON_Init(1);
+  BSP_BUTTON_Init(2);
+  BSP_BUTTON_Init(3);
+  BSP_BUTTON_Init(4);
+  BSP_BUTTON_Init(5);
+  BSP_BUTTON_Init(8);
+  BSP_BUTTON_Init(9);
   
   /* Load Param */
-  tsensor.xParam.xPeriod = 1;
-  
-  xCntState = S_IDLE;
-  xCntY = 0;
-  xCntN = 0;
+  memset(&tsensor.xData, 0, sizeof(Tsensor_DataTypeDef));
 }
 
 //==============================================================================
@@ -74,15 +64,17 @@ void Tsensor_Init(void)
   */
 void Tsensor_Task(void const * argument)
 {
-  static uint32_t tickButton = 0;
-  uint32_t tickNew = HAL_GetTick();
+  static uint32_t tickNew = 0;
+  static uint32_t tickLst = 0;
   
-  if(tickNew - tickButton >= tsensor.xParam.xPeriod)
+  tickNew = HAL_GetTick();
+  if(tickNew - tickLst >= 1)
   {
-    tickButton = tickNew;
+    /* Update tick */
+    tickLst = tickNew;
     
-    /* update coin pin state */
-    if(BSP_EXTI5_ReadState() == GPIO_PIN_RESET)
+    /* Update coin pin state */
+    if(BSP_BUTTON_Read(8))
     {
       xCntY ++;
       xCntN = 0;
@@ -93,91 +85,74 @@ void Tsensor_Task(void const * argument)
       xCntN ++;
     }
     
-    if(xCntState == S_IDLE)
+    /* Update coin state */
+    if(xCntState == 0)
     {
       if(xCntY >= 2)
       {
-        xCntState = S_BUSY;
+        xCntState = 1;
       }
     }
-    else if(xCntState == S_BUSY)
+    else if(xCntState == 1)
     {
-      if(xCntY >= 15)
+      if(xCntY >= 16)
       {
-        xCntState = S_DONE;
+        xCntState = 2;
       }
       if(xCntN >= 2)
       {
-        xCoinError ++;
-        xCntState = S_IDLE;
+        xCntState = 0;
       }
     }
-    else if(xCntState == S_DONE)
+    else if(xCntState == 2)
     {
       if(xCntN >= 2)
       {
         xCoinCounter ++;
-        xCntState = S_IDLE;
+        xCntState = 0;
       }
     }
     else
     {
-      xCntState = S_IDLE;
+      xCntState = 0;
     }
     
+    /* Reset if stay busy */
     if(xCntY >= 200)
     {
-      xCntState = S_IDLE;
+      xCntState = 0;
     }
     
-    /* update coin counter */
+    /* Update coin counter */
     tsensor.xData.xCoin = xCoinCounter;
     
-    /* update key state */
-    tsensor.xData.xKey = 0;
-    if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_0) == GPIO_PIN_RESET)
+    /* Update key state */
+    tsensor.xData.xButton = 0;
+    if(BSP_BUTTON_Read(0))
     {
-      tsensor.xData.xKey |= (0x1<<0);
+      tsensor.xData.xButton |= (0x1<<0);
     }
-    if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1) == GPIO_PIN_RESET)
+    if(BSP_BUTTON_Read(1))
     {
-      tsensor.xData.xKey |= (0x1<<1);
+      tsensor.xData.xButton |= (0x1<<1);
     }
-    
+    if(BSP_BUTTON_Read(2))
+    {
+      tsensor.xData.xButton |= (0x1<<2);
+    }
+    if(BSP_BUTTON_Read(3))
+    {
+      tsensor.xData.xButton |= (0x1<<3);
+    }
+    if(BSP_BUTTON_Read(4))
+    {
+      tsensor.xData.xButton |= (0x1<<4);
+    }
+    if(BSP_BUTTON_Read(5))
+    {
+      tsensor.xData.xButton |= (0x1<<5);
+    }
   }
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_GetInstance
-  * @param  **pSensor
-  * @retval none
-  */
-void Tsensor_GetInstance(Tsensor_TypeDef **pSensor)
-{
-  *pSensor = &tsensor;
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_GetData
-  * @param  pData
-  * @retval none
-  */
-void Tsensor_GetData(Tsensor_DataTypeDef *pData)
-{
-  memcpy(pData, &tsensor.xData, sizeof(Tsensor_DataTypeDef));
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_GetParam
-  * @param  pParam
-  * @retval none
-  */
-void Tsensor_GetParam(Tsensor_ParamTypeDef *pParam)
-{
-  memcpy(pParam, &tsensor.xParam, sizeof(Tsensor_ParamTypeDef));
 }
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

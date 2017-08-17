@@ -21,12 +21,14 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static uint32_t   xCntState;
-static uint32_t   xCntY, xCntN;
-
 //==============================================================================
 /* Controller */
 Tcontrol_TypeDef tcontroller;
+
+//==============================================================================
+/* Ticks */
+static uint32_t   xCntState=0;
+static uint32_t   xCntY=0, xCntN=0;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -39,31 +41,10 @@ Tcontrol_TypeDef tcontroller;
 void Tcontrol_Init(void)
 {
   /* Init Device */
-  GPIO_InitTypeDef GPIO_InitStruct;
-  
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  
-  /* Configure GPIO pins */
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-  
-  /* Configure GPIO pins */
-  GPIO_InitStruct.Pin = GPIO_PIN_5;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-  
-  /* PreSet */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET);
-  
+  BSP_LEDOUT_Init(6);
+  BSP_BUTTON_Init(7);
   /* Load Param */
-  tcontroller.xTicketTotal = 0;
-  tcontroller.xTicketCurrent = 0;
+  memset(&tcontroller, 0, sizeof(Tcontrol_TypeDef));
 }
 
 //==============================================================================
@@ -83,8 +64,8 @@ void Tcontrol_Task(void const * argument)
     /* Update tick */
     tickLst = tickNew;
     
-    /* Update ticket control */
-    if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5) == GPIO_PIN_RESET)
+    /* Update ticket pin */
+    if(BSP_BUTTON_Read(7))
     {
       xCntY ++;
       xCntN = 0;
@@ -95,35 +76,36 @@ void Tcontrol_Task(void const * argument)
       xCntN ++;
     }
     
+    /* Update ticket control */
     if(tcontroller.xTicketCurrent == 0)
     {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET);
+      BSP_LEDOUT_WriteState(6,1);
       xCntState = 0;
     }
     else
     {
-      if(xCntState == 0)
+      if(xCntState == 0)          //idle
       {
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET);
+        BSP_LEDOUT_WriteState(6,0);
         xCntState = 1;
         xCntY = 0;
         xCntN = 0;
       }
-      else if(xCntState == 1)
+      else if(xCntState == 1)     //start
       {
         if(xCntY >= 4)
         {
           xCntState = 2;
         }
       }
-      else if(xCntState == 2)
+      else if(xCntState == 2)     //ON
       {
         if(xCntN >= 4)
         {
           xCntState = 3;
         }
       }
-      else if(xCntState == 3)
+      else if(xCntState == 3)     //stop
       {
         xCntState = 0;
         if(tcontroller.xTicketCurrent > 0)
@@ -133,7 +115,7 @@ void Tcontrol_Task(void const * argument)
         tcontroller.xTicketTotal ++;
       }
       
-      /* If Error */
+      /* Reset if stay busy */
       if(xCntY >= 200)
       {
         xCntState = 0;
