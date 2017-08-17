@@ -1,16 +1,16 @@
 /**
   ******************************************************************************
-  * @file    tcontrol.h
+  * @file    thandler.h
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
-  * @brief   tcontrol
+  * @brief   handler for sensor with control
   ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __TCONTROL_H__
-#define __TCONTROL_H__
+#ifndef __THANDLER_H__
+#define __THANDLER_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,33 +22,33 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 typedef struct
 {
-  int8_t        xMotorRate[2];
-}Tcontrol_DataTypeDef;
+  uint8_t       xReserved;
+}Thandler_DataTypeDef;
 
 typedef struct
 {
   uint8_t       xReserved;
-}Tcontrol_ParamTypeDef;
+}Thandler_ParamTypeDef;
 
 typedef struct
 {
-  Tcontrol_DataTypeDef   xData;
-  Tcontrol_ParamTypeDef  xParam;
-}Tcontrol_TypeDef;
+  Thandler_DataTypeDef   xData;
+  Thandler_ParamTypeDef  xParam;
+}Thandler_TypeDef;
 
 /* Exported constants --------------------------------------------------------*/
 /* Exported variables --------------------------------------------------------*/
-extern Tcontrol_TypeDef tcontroller;
+extern Thandler_TypeDef thandler;
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void Tcontrol_Init(void);
-void Tcontrol_Task(void const * argument);
+void Thandler_Init(void);
+void Thandler_Task(void const * argument);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* __TCONTROL_H__ */
+#endif  /* __THANDLER_H__ */
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

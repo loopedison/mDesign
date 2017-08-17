@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    tcontrol.c
+  * @file    thandler.c
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
-  * @brief   tcontrol
+  * @brief   handler for sensor with control
   ******************************************************************************
   */
 
@@ -13,55 +13,63 @@
 #include "config.h"
 #include "bsp.h"
 /* Includes ------------------------------------------------------------------*/
-#include "tcontrol.h"
+#include "thandler.h"
 /* Includes ------------------------------------------------------------------*/
 #include "storage.h"
+#include "superled.h"
+#include "tsensor.h"
+#include "tcontrol.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 //==============================================================================
-/* Controller */
-Tcontrol_TypeDef tcontroller;
+/* handler */
+Thandler_TypeDef thandler;
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
+
 //==============================================================================
 /**
-  * @brief  Tcontrol Init
+  * @brief  Thandler_Init
   * @param  None
   * @retval None
   */
-void Tcontrol_Init(void)
+void Thandler_Init(void)
 {
-  /* Init Device */
-  BSP_DRIVER_MOTOR_Init();
   /* Loading Param */
-  memset(&tcontroller.xData.xMotorRate, 0, sizeof(Tcontrol_DataTypeDef));
+  memset(&thandler, 0, sizeof(Thandler_DataTypeDef));
 }
 
 //==============================================================================
 /**
-  * @brief  Tcontrol_Task
+  * @brief  Thandler_Task
   * @param  argument
   * @retval none
   */
-void Tcontrol_Task(void const * argument)
+void Thandler_Task(void const * argument)
 {
   static uint32_t tickNew = 0;
   static uint32_t tickLst = 0;
   
   tickNew = HAL_GetTick();
-  if(tickNew - tickLst >= 1)
+  if(tickNew - tickLst >= 10)
   {
     /* Update tick */
     tickLst = tickNew;
     
-    /* Update Motor rate */
-    for(uint32_t i=0; i<2; i++)
+    /* Upload Motor */
+    if(tsensor.xData.xButton != 0)
     {
-      BSP_DRIVER_MOTOR_Set(i, -tcontroller.xData.xMotorRate[i]);
+      if(tcontroller.xData.xMotorRate[0] <= 90)  {tcontroller.xData.xMotorRate[0] += 2;}
+      if(tcontroller.xData.xMotorRate[1] <= 50)  {tcontroller.xData.xMotorRate[1] += 2;}
+    }
+    else
+    {
+      if(tcontroller.xData.xMotorRate[0] >=  2)  {tcontroller.xData.xMotorRate[0] -= 2;}
+      if(tcontroller.xData.xMotorRate[1] >=  2)  {tcontroller.xData.xMotorRate[1] -= 2;}
     }
   }
 }

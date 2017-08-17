@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    tsensor.h
+  * @file    tsensor.c
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
@@ -16,16 +16,11 @@
 #include "tsensor.h"
 /* Includes ------------------------------------------------------------------*/
 #include "storage.h"
-#include "superled.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-//==============================================================================
-/* Button */
-static uint32_t   xButtonStatus = 0;
-
 //==============================================================================
 /* sensor */
 Tsensor_TypeDef   tsensor;
@@ -42,12 +37,8 @@ Tsensor_TypeDef   tsensor;
 void Tsensor_Init(void)
 {
   /* Init Device */
-  BSP_EXTI5_Init();
-  BSP_EXTI6_Init();
-  BSP_KEY_Init(KEY1);
-  BSP_KEY_Init(KEY2);
-  
-  tsensor.xParam.xPeriod = 1;
+  BSP_BUTTON_Init(4);
+  BSP_BUTTON_Init(5);
 }
 
 //==============================================================================
@@ -58,60 +49,26 @@ void Tsensor_Init(void)
   */
 void Tsensor_Task(void const * argument)
 {
-  static uint32_t tickButton = 0;
-  uint32_t tickNew = HAL_GetTick();
+  static uint32_t tickNew = 0;
+  static uint32_t tickLst = 0;
   
-  if(tickNew - tickButton >= tsensor.xParam.xPeriod)
+  tickNew = HAL_GetTick();
+  if(tickNew - tickLst >= 1)
   {
-    tickButton = tickNew;
+    /* Update tick */
+    tickLst = tickNew;
     
-    /* update button */
-    xButtonStatus = 0;
-    if((BSP_KEY_Read(KEY1)==true)||(BSP_EXTI5_ReadState()==GPIO_PIN_RESET))
+    /* Update button */
+    tsensor.xData.xButton = 0;
+    if(BSP_BUTTON_Read(4))
     {
-      xButtonStatus |= (0x1<<0);
+      tsensor.xData.xButton |= (0x1<<0);
     }
-    if((BSP_KEY_Read(KEY2)==true)||(BSP_EXTI6_ReadState()==GPIO_PIN_RESET))
+    if(BSP_BUTTON_Read(5))
     {
-      xButtonStatus |= (0x1<<1);
+      tsensor.xData.xButton |= (0x1<<1);
     }
-    
-    /* update sensor */
-    tsensor.xData.xKey = xButtonStatus;
   }
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_GetInstance
-  * @param  **pSensor
-  * @retval none
-  */
-void Tsensor_GetInstance(Tsensor_TypeDef **pSensor)
-{
-  *pSensor = &tsensor;
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_GetData
-  * @param  pData
-  * @retval none
-  */
-void Tsensor_GetData(Tsensor_DataTypeDef *pData)
-{
-  memcpy(pData, &tsensor.xData, sizeof(Tsensor_DataTypeDef));
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_GetParam
-  * @param  pParam
-  * @retval none
-  */
-void Tsensor_GetParam(Tsensor_ParamTypeDef *pParam)
-{
-  memcpy(pParam, &tsensor.xParam, sizeof(Tsensor_ParamTypeDef));
 }
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

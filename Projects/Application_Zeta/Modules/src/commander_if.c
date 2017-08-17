@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "storage.h"
 #include "tsensor.h"
+#include "tcontrol.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -51,8 +52,7 @@ const Storage_MsgDataUserParamTypeDef cStorageUserParam =
 #define ADDR_USER_CONF_OE           (0X10)
 #define ADDR_USER_CONF_PERIOD       (0X11)
 
-#define ADDR_USER_DATA_KEY         (0X20)
-
+#define ADDR_USER_DATA_BUTTON       (0X20)
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -191,12 +191,11 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
     }
   }
   
-  else if(pAddr == ADDR_USER_DATA_KEY)
+  else if(pAddr == ADDR_USER_DATA_BUTTON)
   {
     if(pLen == sizeof(uint8_t))
     {
-      uint8_t xKeys = (uint8_t)tsensor.xData.xKey;
-      memcpy(pBuff, &xKeys, sizeof(uint8_t));
+      memcpy(pBuff, &tsensor.xData.xButton, sizeof(uint8_t));
       errStatus = CMD_OK;
     }
     else
@@ -410,12 +409,20 @@ uint32_t Commander_If_AutoUpload(void const * argument)
     
     if(hStorageMsgData.xUserConf.xOE[0] == 0xff)
     {
+      static bool initonce = false;
+      if(initonce == false)
+      {
+        initonce = true;
+        /* Init Device */
+        BSP_UART1_Init();
+      }
+      
       /* Upload Message If Connected */
       uint8_t atxMsg[16];
       uint32_t iCnt = 0;
       atxMsg[iCnt++] = 0xaa;
       atxMsg[iCnt++] = 0x55;
-      atxMsg[iCnt++] = tsensor.xData.xKey;
+      atxMsg[iCnt++] = tsensor.xData.xButton;
       uint8_t ckByte = 0;
       for(uint32_t i=0; i<iCnt; i++)
       {
@@ -447,7 +454,7 @@ uint32_t Commander_If_AutoUpload(void const * argument)
       uint8_t atxMsg[8];
       uint32_t iCnt = 0;
       atxMsg[iCnt++] = (0XF<<4)|CMD_TYPE_UPLOAD;
-      atxMsg[iCnt++] = tsensor.xData.xKey;
+      atxMsg[iCnt++] = tsensor.xData.xButton;
       Commander_AppSend(atxMsg, iCnt);
     }
   }
