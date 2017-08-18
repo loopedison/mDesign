@@ -24,21 +24,20 @@ typedef struct
 {
   uint16_t      xAdcValue[4];
   uint16_t      xAdcVoltage[4];
-  int32_t       xRateValue;
   uint8_t       xReserved;
   uint8_t       xButton;
-  int8_t        xYaw;
   int8_t        xSpeed;
+  int8_t        xYaw;
 }Tsensor_DataTypeDef;
 
 typedef struct
 {
   uint16_t      xADCref;
+  uint16_t      xSpdMin;
+  uint16_t      xSpdMax;
   uint16_t      xYawMin;
   uint16_t      xYawMid;
   uint16_t      xYawMax;
-  uint16_t      xSpeedMin;
-  uint16_t      xSpeedMax;
 }Tsensor_ParamTypeDef;
 
 typedef struct
@@ -55,9 +54,6 @@ extern Tsensor_TypeDef tsensor;
 /* Exported functions ------------------------------------------------------- */
 void Tsensor_Init(void);
 void Tsensor_Task(void const * argument);
-void Tsensor_GetInstance(Tsensor_TypeDef **pSensor);
-void Tsensor_GetData(Tsensor_DataTypeDef *pData);
-void Tsensor_GetParam(Tsensor_ParamTypeDef *pParam);
 
 #ifdef __cplusplus
 }

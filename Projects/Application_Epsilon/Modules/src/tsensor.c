@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    tsensor.h
+  * @file    tsensor.c
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
@@ -16,7 +16,6 @@
 #include "tsensor.h"
 /* Includes ------------------------------------------------------------------*/
 #include "storage.h"
-#include "superled.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -30,31 +29,33 @@ Tsensor_TypeDef tsensor;
 /* adc vref+ /mv */
 #define ADC_CHANNEL_NUM     BSP_ADC1_CHANNEL_NUM
 /* adc result */
-static uint16_t adcValue[4] = {0};
+static uint16_t adcValue[ADC_CHANNEL_NUM] = {0};
 static uint32_t adcUpdateFlag = 0;
 
 //==============================================================================
 /* Counter */
-static int32_t  counterValue = 0;
+static int32_t  xCounterValue = 0;
 
 //==============================================================================
-/* rate */
-#define RATE_PERIOD     (2000)    //ms
-#define RATE_DIV        ( 100)
-#define RATE_DB_SIZE    (RATE_DIV)
+/* Counter Rate */
+#define COUNTRATE_PERIOD      (2000)    //ms
+#define COUNTRATE_DIVIDE      ( 100)
+#define COUNTRATE_DB_SIZE     (COUNTRATE_DIVIDE)
 
 typedef struct
 {
-  int32_t               iFlag;
+  int32_t               xFlag;
   int32_t               xCnt;
-}Rate_DataDef;
+}CountRate_DataDef;
 typedef struct
 {
-  Rate_DataDef          pDB[RATE_DB_SIZE];
-}Rate_TypeDef;
-static Rate_TypeDef     xRate;
+  CountRate_DataDef     xCR_DB[COUNTRATE_DB_SIZE];
+  int32_t               xCR_Value;
+}CountRate_TypeDef;
+static CountRate_TypeDef xCountRate;
 
 /* Private function prototypes -----------------------------------------------*/
+uint32_t Tsensor_RateCalc(CountRate_TypeDef *pRate, int32_t *pCounter, int32_t *pValue);
 /* Private functions ---------------------------------------------------------*/
 
 //==============================================================================
@@ -66,94 +67,39 @@ static Rate_TypeDef     xRate;
 void Tsensor_Init(void)
 {
   /* Init Device */
-  BSP_TIM2_Init();
   BSP_ADC1_Init();
+  BSP_TIM2_Init();
   BSP_EXTI5_Init();
   BSP_EXTI6_Init();
-  BSP_BUTTON_Init(BUTTON_1);
-  BSP_BUTTON_Init(BUTTON_2);
+  BSP_BUTTON_Init(6);
+  BSP_BUTTON_Init(7);
+  BSP_BUTTON_Init(8);
+  BSP_BUTTON_Init(9);
   
   /* Clear tsensor */
   memset(&tsensor, 0, sizeof(Tsensor_TypeDef));
-  
   /* Initialize For ADC */
   tsensor.xParam.xADCref    = *(uint16_t *)hStorageMsgData.xUserParam.xParamADCref;
   /* Initialize For tsensor */
+  tsensor.xParam.xSpdMin    = *(uint16_t *)hStorageMsgData.xUserParam.xParamSpeedMin;
+  tsensor.xParam.xSpdMax    = *(uint16_t *)hStorageMsgData.xUserParam.xParamSpeedMax;
   tsensor.xParam.xYawMin    = *(uint16_t *)hStorageMsgData.xUserParam.xParamYawMin;
   tsensor.xParam.xYawMid    = *(uint16_t *)hStorageMsgData.xUserParam.xParamYawMid;
   tsensor.xParam.xYawMax    = *(uint16_t *)hStorageMsgData.xUserParam.xParamYawMax;
-  tsensor.xParam.xSpeedMin  = *(uint16_t *)hStorageMsgData.xUserParam.xParamSpeedMin;
-  tsensor.xParam.xSpeedMax  = *(uint16_t *)hStorageMsgData.xUserParam.xParamSpeedMax;
+  
+  /* Initialize For CountRate */
+  memset(&xCountRate, 0, sizeof(CountRate_TypeDef));
+  for(uint32_t i=0; i<COUNTRATE_DB_SIZE; i++)
+  {
+    xCountRate.xCR_DB[i].xFlag = i;
+    xCountRate.xCR_DB[i].xCnt = 0;
+  }
+  
   /* Start ADC */
   HAL_ADCEx_Calibration_Start(&hadc1);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcValue, ADC_CHANNEL_NUM);
   HAL_TIM_Base_Start(&htim2);
   HAL_TIM_OC_Start(&htim2,TIM_CHANNEL_2);
-  
-  /* Initialize For Rate */
-  for(uint32_t i=0; i<RATE_DB_SIZE; i++)
-  {
-    xRate.pDB[i].iFlag = i;
-    xRate.pDB[i].xCnt = 0;
-  }
-}
-
-//==============================================================================
-/**
-  * @brief  Conversion complete callback in non blocking mode 
-  * @param  hadc: ADC handle
-  * @retval None
-  * @note   INT mode
-  */
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-  if(hadc == &hadc1)
-  {
-    adcUpdateFlag = 1;
-  }
-}
-
-//==============================================================================
-/**
-  * @brief  EXTI Interrupt
-  * @param  GPIO_PIN
-  * @retval none
-  * @note   INT mode
-  */
-void HAL_GPIO_EXTI_Callback_EXTI5(uint16_t GPIO_Pin)
-{
-  if(BSP_EXTI6_ReadState() == GPIO_PIN_RESET)
-  { counterValue -= 1; }
-  else
-  { counterValue += 1; }
-}
-void HAL_GPIO_EXTI_Callback_EXTI6(uint16_t GPIO_Pin)
-{
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor Rate Calc
-  * @param  pRate   :
-  * @param  pCounter  :
-  * @param  pValue  :
-  * @retval rate value
-  */
-uint32_t Tsensor_RateCalc(Rate_TypeDef *pRate, int32_t *pCounter, int32_t *pValue)
-{
-  int32_t xVal = 0;
-  for(uint32_t i=0; i<RATE_DB_SIZE; i++)
-  {
-    pRate->pDB[i].iFlag += 1;
-    if(pRate->pDB[i].iFlag >= RATE_DB_SIZE)
-    {
-      pRate->pDB[i].iFlag = 0;
-      xVal = *pCounter - pRate->pDB[i].xCnt;
-      pRate->pDB[i].xCnt = *pCounter;
-    }
-  }
-  *pValue = xVal;
-  return (0);
 }
 
 //==============================================================================
@@ -195,30 +141,34 @@ void Tsensor_Task(void const * argument)
   }
   
   /* Update rate, Speed */
-  static uint32_t tickRate = 0;
-  uint32_t tickNew = HAL_GetTick();
-  if(tickNew - tickRate >= RATE_PERIOD/RATE_DIV)
+  static uint32_t tickNew0 = 0;
+  static uint32_t tickLst0 = 0;
+  
+  tickNew0 = HAL_GetTick();
+  if(tickNew0 - tickLst0 >= COUNTRATE_PERIOD/COUNTRATE_DIVIDE)
   {
-    tickRate = tickNew;
-    Tsensor_RateCalc(&xRate, &counterValue, &tsensor.xData.xRateValue);
+    /* Update tick */
+    tickLst0 = tickNew0;
     
-    if(tsensor.xData.xRateValue < (-1)*tsensor.xParam.xSpeedMax)
+    Tsensor_RateCalc(&xCountRate, &xCounterValue, &xCountRate.xCR_Value);
+    
+    if(xCountRate.xCR_Value < (-1)*tsensor.xParam.xSpdMax)
     {
       tsensor.xData.xSpeed = -100;
     }
-    else if(tsensor.xData.xRateValue < (-1)*tsensor.xParam.xSpeedMin)
+    else if(xCountRate.xCR_Value < (-1)*tsensor.xParam.xSpdMin)
     {
-      tsensor.xData.xSpeed = -100*(-tsensor.xData.xRateValue-tsensor.xParam.xSpeedMin)  \
-                                  /(tsensor.xParam.xSpeedMax-tsensor.xParam.xSpeedMin);
+      tsensor.xData.xSpeed = -100*(-xCountRate.xCR_Value-tsensor.xParam.xSpdMin)  \
+                                  /(tsensor.xParam.xSpdMax-tsensor.xParam.xSpdMin);
     }
-    else if(tsensor.xData.xRateValue < (1)*tsensor.xParam.xSpeedMin)
+    else if(xCountRate.xCR_Value < (1)*tsensor.xParam.xSpdMin)
     {
       tsensor.xData.xSpeed = 0;
     }
-    else if(tsensor.xData.xRateValue < (1)*tsensor.xParam.xSpeedMax)
+    else if(xCountRate.xCR_Value < (1)*tsensor.xParam.xSpdMax)
     {
-      tsensor.xData.xSpeed = 100* (tsensor.xData.xRateValue-tsensor.xParam.xSpeedMin)   \
-                                  /(tsensor.xParam.xSpeedMax-tsensor.xParam.xSpeedMin);
+      tsensor.xData.xSpeed = 100* (xCountRate.xCR_Value-tsensor.xParam.xSpdMin)   \
+                                  /(tsensor.xParam.xSpdMax-tsensor.xParam.xSpdMin);
     }
     else
     {
@@ -226,50 +176,87 @@ void Tsensor_Task(void const * argument)
     }
   }
   
-  /* Update Key State */
-  tsensor.xData.xButton = 0;
-  if(BSP_BUTTON_Read(BUTTON_1) == true)
-  {
-    tsensor.xData.xButton |= (0x1<<0);
-  }
-  if(BSP_BUTTON_Read(BUTTON_2) == true)
-  {
-    tsensor.xData.xButton |= (0x1<<1);
-  }
+  static uint32_t tickNew = 0;
+  static uint32_t tickLst = 0;
   
+  tickNew = HAL_GetTick();
+  if(tickNew - tickLst >= 1)
+  {
+    /* Update tick */
+    tickLst = tickNew;
+    
+    /* Update Button State */
+    tsensor.xData.xButton = 0;
+    if(BSP_BUTTON_Read(6))
+    {
+      tsensor.xData.xButton |= (0x1<<0);
+    }
+    if(BSP_BUTTON_Read(7))
+    {
+      tsensor.xData.xButton |= (0x1<<1);
+    }
+    if(BSP_BUTTON_Read(8))
+    {
+      tsensor.xData.xButton |= (0x1<<2);
+    }
+    if(BSP_BUTTON_Read(9))
+    {
+      tsensor.xData.xButton |= (0x1<<3);
+    }
+  }
 }
 
 //==============================================================================
 /**
-  * @brief  Tsensor_GetInstance
-  * @param  **pSensor
-  * @retval none
+  * @brief  Tsensor Rate Calc
+  * @param  pRate   :
+  * @param  pCounter  :
+  * @param  pValue  :
+  * @retval rate value
   */
-void Tsensor_GetInstance(Tsensor_TypeDef **pSensor)
+uint32_t Tsensor_RateCalc(CountRate_TypeDef *pRate, int32_t *pCounter, int32_t *pValue)
 {
-  *pSensor = &tsensor;
+  for(uint32_t i=0; i<COUNTRATE_DB_SIZE; i++)
+  {
+    pRate->xCR_DB[i].xFlag += 1;
+    if(pRate->xCR_DB[i].xFlag >= COUNTRATE_DB_SIZE)
+    {
+      pRate->xCR_DB[i].xFlag = 0;
+      *pValue = *pCounter - pRate->xCR_DB[i].xCnt;
+      pRate->xCR_DB[i].xCnt = *pCounter;
+    }
+  }
+  return (0);
 }
 
 //==============================================================================
 /**
-  * @brief  Tsensor_GetData
-  * @param  pData
-  * @retval none
+  * @brief  Conversion complete callback in non blocking mode 
+  * @param  hadc: ADC handle
+  * @retval None
+  * @note   INT mode
   */
-void Tsensor_GetData(Tsensor_DataTypeDef *pData)
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-  memcpy(pData, &tsensor.xData, sizeof(Tsensor_DataTypeDef));
+  if(hadc == &hadc1)
+  {
+    adcUpdateFlag = 1;
+  }
 }
 
 //==============================================================================
 /**
-  * @brief  Tsensor_GetParam
-  * @param  pParam
+  * @brief  EXTI Interrupt
+  * @param  GPIO_PIN
   * @retval none
+  * @note   INT mode
   */
-void Tsensor_GetParam(Tsensor_ParamTypeDef *pParam)
+void HAL_GPIO_EXTI_Callback_EXTI5(uint16_t GPIO_Pin)
 {
-  memcpy(pParam, &tsensor.xParam, sizeof(Tsensor_ParamTypeDef));
+  if(BSP_EXTI6_Read())    //if reset
+  { xCounterValue -= 1; }
+  else
+  { xCounterValue += 1; }
 }
 
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

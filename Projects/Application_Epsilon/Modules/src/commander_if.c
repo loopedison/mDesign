@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    commander_if.h
+  * @file    commander_if.c
   * @author  LoopEdison
   * @version V1.0
   * @date    12-December-2016
@@ -30,8 +30,8 @@
 #define PARAM_YAW_MIN       (0X0400)
 #define PARAM_YAW_MID       (0X0800)
 #define PARAM_YAW_MAX       (0X0A00)
-#define PARAM_SPEED_MIN     (   1UL)
-#define PARAM_SPEED_MAX     (  10UL)
+#define PARAM_SPEED_MIN     (   2UL)
+#define PARAM_SPEED_MAX     (  20UL)
 
 const Storage_MsgDataUserConfTypeDef cStorageUserConf =
 {
@@ -425,7 +425,7 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(uint16_t))
     {
-      memcpy(pBuff, &tsensor.xParam.xSpeedMin, sizeof(uint16_t));
+      memcpy(pBuff, &tsensor.xParam.xSpdMin, sizeof(uint16_t));
       errStatus = CMD_OK;
     }
     else
@@ -437,7 +437,7 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(uint16_t))
     {
-      memcpy(pBuff, &tsensor.xParam.xSpeedMax, sizeof(uint16_t));
+      memcpy(pBuff, &tsensor.xParam.xSpdMax, sizeof(uint16_t));
       errStatus = CMD_OK;
     }
     else
@@ -724,7 +724,7 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
           Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
           errStatus = CMD_OK;
         }
-        memcpy(&tsensor.xParam.xSpeedMin, &hStorageMsgData.xUserParam.xParamSpeedMin, sizeof(uint16_t));
+        memcpy(&tsensor.xParam.xSpdMin, &hStorageMsgData.xUserParam.xParamSpeedMin, sizeof(uint16_t));
       }
       else
       {
@@ -754,7 +754,7 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
           Storage_WriteData(STORAGE_HANDLE, &hStorageMsgData);
           errStatus = CMD_OK;
         }
-        memcpy(&tsensor.xParam.xSpeedMax, &hStorageMsgData.xUserParam.xParamSpeedMax, sizeof(uint16_t));
+        memcpy(&tsensor.xParam.xSpdMax, &hStorageMsgData.xUserParam.xParamSpeedMax, sizeof(uint16_t));
       }
       else
       {
@@ -835,73 +835,11 @@ uint32_t Commander_If_AutoUpload(void const * argument)
     /* Update tick */
     tickLst = tickNew;
     
-    //include external variables
-    #include "usbd_core.h"
-    #include "usbd_desc.h"
-    #include "usbd_cdc.h"
-    #include "usbd_cdc_if.h"
-    #include "crc16.h"
-    extern USBD_HandleTypeDef hUsbDeviceFS;
-    
     if(hStorageMsgData.xUserConf.xOE[0] == 0xff)
     {
-      /* Upload Message If Connected */
-      uint8_t atxMsg[16];
-      uint32_t iCnt = 0;
-      int16_t xTemp;
-      atxMsg[iCnt++] = 0x5a;
-      atxMsg[iCnt++] = 0x01;
-      //speed
-      xTemp = 30*tsensor.xData.xSpeed/100;  //limit to 10 rpm
-      memcpy(&atxMsg[iCnt], &xTemp, sizeof(int16_t));
-      iCnt += sizeof(int16_t);
-      //angle
-      xTemp = 60*tsensor.xData.xYaw/100;    //limit to 60 degree
-      memcpy(&atxMsg[iCnt], &xTemp, sizeof(int16_t));
-      iCnt += sizeof(int16_t);
-      //check
-      atxMsg[iCnt++] = 0x01;
-      atxMsg[iCnt++] = 0x01;
-      
-      /* Transfer via usb */
-      if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED)
-      {
-        CDC_Transmit_FS(atxMsg, iCnt);
-      }
     }
     else if(hStorageMsgData.xUserConf.xOE[0] == 0xfe)
     {
-      /* Upload Message If Connected */
-      uint8_t atxMsg[16];
-      uint32_t iCnt = 0;
-      int16_t xTemp;
-      uint8_t xKeys;
-      uint16_t xCrc;
-      atxMsg[iCnt++] = 0x10;
-      atxMsg[iCnt++] = 0xff;
-      atxMsg[iCnt++] = 0x05;
-      //speed
-      xTemp = 30*tsensor.xData.xSpeed/100;  //limit to 10 rpm
-      memcpy(&atxMsg[iCnt], &xTemp, sizeof(int16_t));
-      iCnt += sizeof(int16_t);
-      //angle
-      xTemp = 60*tsensor.xData.xYaw/100;    //limit to 60 degree
-      memcpy(&atxMsg[iCnt], &xTemp, sizeof(int16_t));
-      iCnt += sizeof(int16_t);
-      //button
-      xKeys = (uint8_t)tsensor.xData.xButton&0x03;
-      memcpy(&atxMsg[iCnt], &xKeys, sizeof(uint8_t));
-      iCnt += sizeof(uint8_t);
-      //crc
-      xCrc = CRC16_MODEBUS(atxMsg, iCnt);
-      memcpy(&atxMsg[iCnt], &xCrc, sizeof(int16_t));
-      iCnt += sizeof(int16_t);
-      
-      /* Transfer via usb */
-      if(hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED)
-      {
-        CDC_Transmit_FS(atxMsg, iCnt);
-      }
     }
     else if(hStorageMsgData.xUserConf.xOE[0] >= 0x01)
     {

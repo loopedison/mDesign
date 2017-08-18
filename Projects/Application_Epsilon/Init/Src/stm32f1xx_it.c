@@ -130,16 +130,6 @@ void DMA1_Channel1_IRQHandler(void)
 }
 
 //==============================================================================
-__weak void HAL_GPIO_EXTI_Callback_EXTI0(uint16_t GPIO_Pin)
-{
-  /* NOTE: This function Should not be modified, when the exti is needed,
-   */
-}
-__weak void HAL_GPIO_EXTI_Callback_EXTI1(uint16_t GPIO_Pin)
-{
-  /* NOTE: This function Should not be modified, when the exti is needed,
-   */
-}
 __weak void HAL_GPIO_EXTI_Callback_EXTI5(uint16_t GPIO_Pin)
 {
   /* NOTE: This function Should not be modified, when the exti is needed,
@@ -153,20 +143,6 @@ __weak void HAL_GPIO_EXTI_Callback_EXTI6(uint16_t GPIO_Pin)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-#ifdef BSP_EXTI0_MODULE_ENABLED
-  if(GPIO_Pin == GPIO_PIN_0)
-  {
-    HAL_GPIO_EXTI_Callback_EXTI0(GPIO_Pin);
-  }
-#endif /* BSP_EXTI0_MODULE_ENABLED */
-  
-#ifdef BSP_EXTI1_MODULE_ENABLED
-  if(GPIO_Pin == GPIO_PIN_1)
-  {
-    HAL_GPIO_EXTI_Callback_EXTI1(GPIO_Pin);
-  }
-#endif /* BSP_EXTI1_MODULE_ENABLED */
-  
 #ifdef BSP_EXTI_MODULE_ENABLED
   if(GPIO_Pin == GPIO_PIN_5)
   {

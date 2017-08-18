@@ -10,8 +10,8 @@
 
 /*
 ********************************************************************************
-  *1, Application For Vehicle (Bicycle Control)
+  *1, Application For Vehicle (Spinning Control)
   *2, USB For Communication
-  *3, Method: Counter For Speed
+  *3, 
   ******************************************************************************
   */

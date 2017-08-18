@@ -712,19 +712,29 @@
               <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_exti.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_tim2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_tim2.c</FilePath>
-            </File>
-            <File>
               <FileName>bsp_adc1.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_adc1.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_tim2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_tim2.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_tim3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_tim3.c</FilePath>
+            </File>
+            <File>
               <FileName>bsp_button.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_button.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_ledout.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_ledout.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -797,11 +807,6 @@
               <FilePath>..\Modules\src\superled.c</FilePath>
             </File>
             <File>
-              <FileName>tsensor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Modules\src\tsensor.c</FilePath>
-            </File>
-            <File>
               <FileName>commander.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Modules\src\commander.c</FilePath>
@@ -810,6 +815,11 @@
               <FileName>commander_if.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Modules\src\commander_if.c</FilePath>
+            </File>
+            <File>
+              <FileName>tsensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Modules\src\tsensor.c</FilePath>
             </File>
           </Files>
         </Group>
