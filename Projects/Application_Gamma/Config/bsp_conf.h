@@ -87,7 +87,7 @@ extern "C" {
   #define TIM3_PWM_DEFAULT_PRESCALER    (72-1)
   #define TIM3_PWM_DEFAULT_PERIOD       (1000-1)    //1k hz
   #define TIM3_PWM_DEFAULT_PULSE        (2)
-  #define TIM3_PWM_CHANNEL_NUM          (2)         //channel
+  #define TIM3_PWM_CHANNEL_NUM          (4)         //channel
 #endif /* BSP_TIM3_MODULE_ENABLED */
 
 #ifdef BSP_I2C1_MODULE_ENABLED

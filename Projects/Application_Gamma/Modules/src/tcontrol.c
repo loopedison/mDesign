@@ -39,7 +39,7 @@ void Tcontrol_Init(void)
   /* Init Device */
   BSP_TIM3_Init();
   /* Loading Param */
-  for(uint32_t i=0; i<2; i++) {tcontroller.xMotorRate[i] = 0;}
+  for(uint32_t i=0; i<4; i++) {tcontroller.xMotorRate[i] = 0;}
 }
 
 //==============================================================================
@@ -60,7 +60,7 @@ void Tcontrol_Task(void const * argument)
     tickLst = tickNew;
     
     /* Update Motor rate */
-    for(uint32_t i=0; i<2; i++)
+    for(uint32_t i=0; i<4; i++)
     {
       BSP_TIM3_SetChannelRate(i, abs(tcontroller.xMotorRate[i]));
     }
