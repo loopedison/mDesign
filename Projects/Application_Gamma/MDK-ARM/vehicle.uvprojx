@@ -741,6 +741,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_ledout.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_driver_MOTOR.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Drivers\BSP\STM32F103\src\bsp_driver_MOTOR.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

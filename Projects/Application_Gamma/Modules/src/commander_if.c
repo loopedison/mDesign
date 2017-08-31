@@ -214,7 +214,7 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(int8_t))
     {
-      int8_t xMotor = (int8_t)(tcontroller.xMotorRate[0]);
+      int8_t xMotor = (int8_t)(tcontroller.xData.xMotorRate[0]);
       memcpy(pBuff, &xMotor, sizeof(int8_t));
       errStatus = CMD_OK;
     }
@@ -227,7 +227,7 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(int8_t))
     {
-      int8_t xMotor = (int8_t)(tcontroller.xMotorRate[1]);
+      int8_t xMotor = (int8_t)(tcontroller.xData.xMotorRate[1]);
       memcpy(pBuff, &xMotor, sizeof(int8_t));
       errStatus = CMD_OK;
     }
@@ -240,7 +240,7 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(int8_t))
     {
-      int8_t xMotor = (int8_t)(tcontroller.xMotorRate[2]);
+      int8_t xMotor = (int8_t)(tcontroller.xData.xMotorRate[2]);
       memcpy(pBuff, &xMotor, sizeof(int8_t));
       errStatus = CMD_OK;
     }
@@ -253,7 +253,7 @@ uint32_t Commander_If_Read(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(int8_t))
     {
-      int8_t xMotor = (int8_t)(tcontroller.xMotorRate[3]);
+      int8_t xMotor = (int8_t)(tcontroller.xData.xMotorRate[3]);
       memcpy(pBuff, &xMotor, sizeof(int8_t));
       errStatus = CMD_OK;
     }
@@ -402,7 +402,7 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(int8_t))
     {
-      tcontroller.xMotorRate[0] = (int8_t)pBuff[0];
+      tcontroller.xData.xMotorRate[0] = (int8_t)pBuff[0];
       errStatus = CMD_OK;
     }
     else
@@ -414,7 +414,7 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(int8_t))
     {
-      tcontroller.xMotorRate[1] = (int8_t)pBuff[0];
+      tcontroller.xData.xMotorRate[1] = (int8_t)pBuff[0];
       errStatus = CMD_OK;
     }
     else
@@ -426,7 +426,7 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(int8_t))
     {
-      tcontroller.xMotorRate[2] = (int8_t)pBuff[0];
+      tcontroller.xData.xMotorRate[2] = (int8_t)pBuff[0];
       errStatus = CMD_OK;
     }
     else
@@ -438,7 +438,7 @@ uint32_t Commander_If_Write(uint32_t pAddr, uint8_t *pBuff, uint32_t pLen)
   {
     if(pLen == sizeof(int8_t))
     {
-      tcontroller.xMotorRate[3] = (int8_t)pBuff[0];
+      tcontroller.xData.xMotorRate[3] = (int8_t)pBuff[0];
       errStatus = CMD_OK;
     }
     else

@@ -16,7 +16,6 @@
 #include "tcontrol.h"
 /* Includes ------------------------------------------------------------------*/
 #include "storage.h"
-#include "superled.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -37,9 +36,9 @@ Tcontrol_TypeDef tcontroller;
 void Tcontrol_Init(void)
 {
   /* Init Device */
-  BSP_TIM3_Init();
+  BSP_DRIVER_MOTOR_Init();
   /* Loading Param */
-  for(uint32_t i=0; i<4; i++) {tcontroller.xMotorRate[i] = 0;}
+  memset(&tcontroller.xData.xMotorRate, 0, sizeof(Tcontrol_DataTypeDef));
 }
 
 //==============================================================================
@@ -62,7 +61,7 @@ void Tcontrol_Task(void const * argument)
     /* Update Motor rate */
     for(uint32_t i=0; i<4; i++)
     {
-      BSP_TIM3_SetChannelRate(i, abs(tcontroller.xMotorRate[i]));
+      BSP_DRIVER_MOTOR_Set(i, -tcontroller.xData.xMotorRate[i]);
     }
   }
 }

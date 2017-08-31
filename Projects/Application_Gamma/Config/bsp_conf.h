@@ -34,6 +34,7 @@ extern "C" {
 #define BSP_I2C1_MODULE_ENABLED
 #define BSP_BUTTON_MODULE_ENABLED
 #define BSP_LEDOUT_MODULE_ENABLED
+#define BSP_DRIVER_MOTOR_MODULE_ENABLED
 
 /* Module Configure --------------------------------------------------------- */
 #ifdef BSP_SYSLED_MODULE_ENABLED
@@ -162,6 +163,11 @@ extern "C" {
   #define LEDOUT_9_GPIO_PIN             GPIO_PIN_1
   #define LEDOUT_9_GPIO_PORT            GPIOB
 #endif /* BSP_LEDOUT_MODULE_ENABLED */
+
+#ifdef BSP_DRIVER_MOTOR_MODULE_ENABLED
+  #include "bsp_driver_motor.h"
+  #define MOTOR_CONFIG_WITH_TIM3        (1)
+#endif /* BSP_DRIVER_MOTOR_MODULE_ENABLED */
 
 #ifdef __cplusplus
 }

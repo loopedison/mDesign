@@ -23,6 +23,17 @@ extern "C" {
 typedef struct
 {
   int8_t        xMotorRate[4];
+}Tcontrol_DataTypeDef;
+
+typedef struct
+{
+  uint8_t       xReserved;
+}Tcontrol_ParamTypeDef;
+
+typedef struct
+{
+  Tcontrol_DataTypeDef   xData;
+  Tcontrol_ParamTypeDef  xParam;
 }Tcontrol_TypeDef;
 
 /* Exported constants --------------------------------------------------------*/

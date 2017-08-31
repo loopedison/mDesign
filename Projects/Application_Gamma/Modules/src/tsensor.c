@@ -79,37 +79,4 @@ void Tsensor_Task(void const * argument)
   }
 }
 
-//==============================================================================
-/**
-  * @brief  Tsensor_GetInstance
-  * @param  **pSensor
-  * @retval none
-  */
-void Tsensor_GetInstance(Tsensor_TypeDef **pSensor)
-{
-  *pSensor = &tsensor;
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_GetData
-  * @param  pData
-  * @retval none
-  */
-void Tsensor_GetData(Tsensor_DataTypeDef *pData)
-{
-  memcpy(pData, &tsensor.xData, sizeof(Tsensor_DataTypeDef));
-}
-
-//==============================================================================
-/**
-  * @brief  Tsensor_GetParam
-  * @param  pParam
-  * @retval none
-  */
-void Tsensor_GetParam(Tsensor_ParamTypeDef *pParam)
-{
-  memcpy(pParam, &tsensor.xParam, sizeof(Tsensor_ParamTypeDef));
-}
-
 /************************ (C) COPYRIGHT LOOPEDISON *********END OF FILE********/

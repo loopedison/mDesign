@@ -44,9 +44,6 @@ extern Tsensor_TypeDef tsensor;
 /* Exported functions ------------------------------------------------------- */
 void Tsensor_Init(void);
 void Tsensor_Task(void const * argument);
-void Tsensor_GetInstance(Tsensor_TypeDef **pSensor);
-void Tsensor_GetData(Tsensor_DataTypeDef *pData);
-void Tsensor_GetParam(Tsensor_ParamTypeDef *pParam);
 
 #ifdef __cplusplus
 }

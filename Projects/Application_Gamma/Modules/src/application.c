@@ -35,7 +35,7 @@
 #define STORAGE_INFO_NAME           "Mixed Control"
 #define STORAGE_SYS_PID             (0XFF010300)
 #define STORAGE_SYS_UID             (0XFFFFFFFF)
-#define STORAGE_SYS_SOFT_VER        (0XF111)
+#define STORAGE_SYS_SOFT_VER        (0XF112)
 #define STORAGE_SYS_HARD_VER        (0XF120)
 //##############################################################################
 /* Private macro -------------------------------------------------------------*/
